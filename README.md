@@ -58,50 +58,65 @@ var puzzle = new Puzzle({options});
 
 
 ## Methods
-
-**init()**
+```
+init()
+```
 
 Initialize puzzle instance and attach to container element.
 
 **returns** puzzle instance.
 
-**setOpts( Object[ {options} ] )**
+```
+setOpts( Object[ {options} ] )
+```
 
 Redeclare options on current puzzle.
 
 **returns** puzzle instance.
 
-**setDifficulty( String["easy" | "normal" | "hard" | "expert"] )**
+```
+setDifficulty( String["easy" | "normal" | "hard" | "expert"] )
+```
 
 Set difficulty of a puzzle using one of the predefined options.
 
 **returns** puzzle instance.
 
-**setGridSize( Object[ { [numrows, numcolumns] } ])**
+```
+setGridSize( Object[ { [numrows, numcolumns] } ])
+```
 
 Update the number of rows or columns for a puzzle.
 
 **returns** puzzle instance.
 
-**setImage( String[image_url] )**
+```
+setImage( String[image_url] )
+```
 
 Update the puzzle image (_Must be a valid src value for the `<img>` tag_).
 
 **returns** puzzle instance.
 
-**isSorted()**
+```
+isSorted()
+```
 
 Check to see if the puzzle is completed.
 
 **returns** true or false.
 
-**getTiles()**
+```
+getTiles()
+```
 
 Grabs the current order of tiles in the puzzle.
 
 **returns** multi-dimensional array of tiles, the first item is the original position of the tile and the second is the tile itself.
 
-**correctTiles()**
+```
+correctTiles()
+```
 
 Counts the number of tiles in order and returns that number.
 
