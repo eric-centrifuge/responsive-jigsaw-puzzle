@@ -58,6 +58,9 @@ var puzzle = new Puzzle({options});
 
 
 ## Methods
+
+### Init
+_Usage:_
 ```
 init()
 ```
@@ -66,6 +69,8 @@ Initialize puzzle instance and attach to container element.
 
 **returns** puzzle instance.
 
+### setOpts
+_Usage:_
 ```
 setOpts( Object[ {options} ] )
 ```
@@ -74,6 +79,8 @@ Redeclare options on current puzzle.
 
 **returns** puzzle instance.
 
+### setDifficulty
+_Usage:_
 ```
 setDifficulty( String["easy" | "normal" | "hard" | "expert"] )
 ```
@@ -82,6 +89,8 @@ Set difficulty of a puzzle using one of the predefined options.
 
 **returns** puzzle instance.
 
+### setGridSize
+_Usage:_
 ```
 setGridSize( Object[ { [numrows, numcolumns] } ])
 ```
@@ -90,6 +99,8 @@ Update the number of rows or columns for a puzzle.
 
 **returns** puzzle instance.
 
+### setImage
+_Usage:_
 ```
 setImage( String[image_url] )
 ```
@@ -98,6 +109,8 @@ Update the puzzle image (_Must be a valid src value for the `<img>` tag_).
 
 **returns** puzzle instance.
 
+### isSorted
+_Usage:_
 ```
 isSorted()
 ```
@@ -106,6 +119,8 @@ Check to see if the puzzle is completed.
 
 **returns** true or false.
 
+### getTiles
+_Usage:_
 ```
 getTiles()
 ```
@@ -114,6 +129,8 @@ Grabs the current order of tiles in the puzzle.
 
 **returns** multi-dimensional array of tiles, the first item is the original position of the tile and the second is the tile itself.
 
+### correctTiles
+_Usage:_
 ```
 correctTiles()
 ```
