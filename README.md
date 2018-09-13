@@ -52,12 +52,12 @@ var puzzle = new Puzzle({options});
 | Property 	| Description 	| Default 	|
 | --------- |:-------------:| ---------:|
 
-| **el**	| Container element which will hold the puzzle. _This option **MUST** be passed a valid HTML element_ | null
-| **image**	| URL for the image to be used. Must be a valid src value for the <img> tag | :)
-| **numcolumns** | Number of columns in the puzzle grid | 3
-| **numrows** | Number of rows in the puzzle grid | 3
-| **difficulty** | Determines how much of the puzzle is shuffled. Values include "easy","normal","hard" and "expert" | "normal"
-| **debug** | Outputs useful information for drag/drop events. Must be set as a boolean value | false
+| **el**	| Container element which will hold the puzzle. _This option **MUST** be passed a valid HTML element_ | null |
+| **image**	| URL for the image to be used. Must be a valid src value for the <img> tag | :) |
+| **numcolumns** | Number of columns in the puzzle grid | 3 |
+| **numrows** | Number of rows in the puzzle grid | 3 |
+| **difficulty** | Determines how much of the puzzle is shuffled. Values include "easy","normal","hard" and "expert" | "normal" |
+| **debug** | Outputs useful information for drag/drop events. Must be set as a boolean value | false |
 
 
 ## Running the tests
