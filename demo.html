@@ -1,0 +1,135 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <base target="_parent" />
+    <title>Responsive jQuery Jigsaw Puzzle</title>
+    <!-- Latest compiled and minified CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
+    <!-- Styles -->
+    <link rel="stylesheet" href="https://s3.amazonaws.com/content.cdrfg.com/css/puzzle.css">
+    <link rel="stylesheet" href="demo.css">
+    <!-- Include Polyfills First -->
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=default"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" type="text/javascript"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js" type="text/javascript"></script>
+    <script src="https://s3.amazonaws.com/content.cdrfg.com/scripts/puzzle.js"></script>
+</head>
+
+<body class="center-content">
+    
+    <input type="checkbox" name="options" id="options" style="display: none;">
+
+    <label for="options" class="controls no-select">OPTIONS</label>
+
+    <div id="puzzle1" style="padding: 20px;"></div>
+
+    <div class="options">
+        <div class="fgroup grid">
+            <div class="fieldset">
+                <label for="numrows"># of rows</label>
+                <input type="number" name="numrows" value="3" min="1" max="10">
+
+                <label for="numcolumns"># of columns</label>
+                <input type="number" name="numcolumns" value="3" min="1" max="10">
+            </div>
+        </div>
+
+        <div class="fgroup image">
+            <div class="fieldset" style="text-align: left;">
+                <label for="image">Image URL</label>
+                <input type="text" name="image" style="width: 100%;" value="">
+            </div>
+        </div>
+
+        <div class="fgroup no-select">
+            <div class="fieldset">
+                <input type="radio" id="easy" name="difficulty" value="easy">
+                <label for="easy">Easy</label>
+
+                <input type="radio" id="normal" name="difficulty" value="normal">
+                <label for="normal">Normal</label>
+
+                <input type="radio" id="hard" name="difficulty" value="hard">
+                <label for="hard">Hard</label>
+
+                <input type="radio" id="expert" name="difficulty" value="expert" checked>
+                <label for="expert">Expert</label>
+            </div>
+        </div>
+
+        <div class="btngroup">
+            <div class="ui-btn no-select" data-attr="reset">UPDATE</div>
+        </div>
+    </div>
+
+    <div data-attr="reset" class="controls no-select" style="display: inline-block;">SHUFFLE</div>
+
+    <script type="text/javascript">
+
+        document.addEventListener('DOMContentLoaded',function() {
+            function getURLParameter(sParam) {
+                var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+                    sURLVariables = sPageURL.split('&'),
+                    sParameterName,
+                    i;
+
+                for (i = 0; i < sURLVariables.length; i++) {
+                    sParameterName = sURLVariables[i].split('=');
+
+                    if (sParameterName[0] === sParam) {
+                        return sParameterName[1] === undefined ? true : sParameterName[1];
+                    }
+                }
+            };
+
+            var opts = {};
+            var image = (getURLParameter('image')) ? getURLParameter('image') : "http://www.ascopost.com/media/14006027/81891_image.jpg";
+            var puzzle1 = document.querySelector('#puzzle1');
+            puzzle1.pz = new Puzzle({
+                "el"         : puzzle1,
+                "image"      : image,
+                "difficulty" : "expert",
+            }).init();
+
+            // update buttons
+            document.querySelectorAll('div[data-attr="reset"]').forEach(function(item){
+                item.addEventListener('click',function(evt){
+                    updatePuzzle(evt);
+                });
+            });
+            
+            // make sure number inputs are between 1 and 10
+            document.querySelectorAll('input[type="number"]').forEach(function(item){
+                item.addEventListener('change',function(evt){
+                    if (Number(this.value) > 10) {
+                        this.value = 10;
+                    } else if (Number(this.value) <= 0) {
+                        this.value = 1;
+                    }
+                });
+            });
+
+            // update puzzle and reinitialize
+            function updatePuzzle(evt) {
+                var inputs = document.querySelectorAll('.options input').forEach(function(item,index){
+                    if (item.value.length && item.type == "text" || item.type == "number") {
+                        opts[item.name] = item.value;
+                    }
+
+                    if (item.value.length && item.type == "radio" && item.checked) {
+                        opts[item.name] = item.value;
+                    }
+                });
+                puzzle1.pz.usropts = opts;
+                puzzle1.pz.init();      
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+.shell {
+    padding: 0;
+    margin-bottom: 50px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    box-sizing: border-box;
+    margin: 0 auto;
+    position: relative;
+    list-style: none;
+}
+
+.shell li {
+    display: inline-block;
+    position: relative;
+    animation: zoomIn 0.2s;
+}
+
+@keyframes zoomIn {
+    from {
+        transform: scale(0.1);
+    }
+
+    to {
+        transform: scale(1);
+    }
+}
+
+.shell div {
+    width: 100%;
+    height: 100%;
+    outline: 1px solid #000;
+    box-sizing: border-box;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.shell div:before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgba(0,0,0,1);
+    transition: all 0.2s;
+}
+
+.shell div.highlight {
+    z-index: 2;
+}
+
+.shell div.highlight:before {
+    outline: none;
+    border:4px solid rgba(0,255,0,1);
+}
+
+.shell li:before {
+    content: "";
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    z-index: -1;
+}
+
+.shell li.highlight {
+    position: relative;
+}
+
+.shell li.highlight:before {
+    background: rgba(0,255,0,.5);
+    z-index: 2;
+}
+
+.shell div > img {
+    display: block;
+    /*filter: grayscale(1);*/
+    z-index: -1;
+    transition: all 0.2s;
+}
+
+.shell img[data-overlay="show"]  {
+    /*filter: grayscale(0);*/
+}
+
+.no-select {
+    position: relative;
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+}
+
+.full-img {
+    max-width: 100%;
+    width: 100% !important; /* Important tags needed to force responsiveness in IE */
+    height: auto !important;
+    background: rgba(255,255,255,1);
+    outline: 2px solid #000;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    opacity: 0;
+    transition: 0.5s opacity;
+}
+
+.btn-primary {
+    background-color: #9a371f;
+    background: #9a371f;
+}
+
+.no-select {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+}
