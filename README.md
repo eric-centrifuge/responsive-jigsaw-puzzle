@@ -50,7 +50,7 @@ var puzzle = new Puzzle({options});
 | Property 	| Description 	| Default 	|
 | --------- | ------------- | --------- |
 | **el**	| Container element which will hold the puzzle. _This option **MUST** be passed a valid HTML element_ | null |
-| **image**	| URL for the image to be used. Must be a valid src value for the <img> tag | :) |
+| **image**	| URL for the image to be used. Must be a valid src value for the [`<img>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#Supported_image_formats) tag | :) |
 | **numcolumns** | Number of columns in the puzzle grid | 3 |
 | **numrows** | Number of rows in the puzzle grid | 3 |
 | **difficulty** | Determines how much of the puzzle is shuffled. Values include "easy","normal","hard" and "expert" | "normal" |
@@ -102,10 +102,10 @@ Update the number of rows or columns for a puzzle.
 ### setImage
 _Usage:_
 ```
-setImage( String[image_url] )
+setImage( String[ image_url ] )
 ```
 
-Update the puzzle image (_Must be a valid src value for the `<img>` tag_).
+Update the puzzle image (_Must be a valid src value for the [`<img>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#Supported_image_formats) tag_).
 
 **returns** puzzle instance.
 
