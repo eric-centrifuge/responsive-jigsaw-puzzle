@@ -50,7 +50,7 @@ var puzzle = new Puzzle({options});
 ## Avaialbe Options
 
 | Property 	| Description 	| Default 	|
-| --------- |:-------------:| ---------:|
+| --------- | ------------- | --------- |
 | **el**	| Container element which will hold the puzzle. _This option **MUST** be passed a valid HTML element_ | null |
 | **image**	| URL for the image to be used. Must be a valid src value for the <img> tag | :) |
 | **numcolumns** | Number of columns in the puzzle grid | 3 |
