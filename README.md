@@ -29,7 +29,7 @@ Javascript dependencies that need to be included:
 
 ### Installing
 
-1. Include the main plugin files:
+1. Include the core plugin files on your page:
 
 ```
 <!-- CSS -->
