@@ -1,4 +1,4 @@
-.shell {
+.frame {
     padding: 0;
     margin-bottom: 50px;
     width: 100%;
@@ -12,7 +12,7 @@
     list-style: none;
 }
 
-.shell li {
+.frame li {
     display: inline-block;
     position: relative;
     animation: zoomIn 0.2s;
@@ -28,7 +28,7 @@
     }
 }
 
-.shell div {
+.frame div {
     width: 100%;
     height: 100%;
     outline: 1px solid #000;
@@ -37,7 +37,7 @@
     cursor: pointer;
 }
 
-.shell div:before {
+.frame div:before {
     content: "";
     position: absolute;
     width: 100%;
@@ -46,16 +46,16 @@
     transition: all 0.2s;
 }
 
-.shell div.highlight {
+.frame div.highlight {
     z-index: 2;
 }
 
-.shell div.highlight:before {
+.frame div.highlight:before {
     outline: none;
     border:4px solid rgba(0,255,0,1);
 }
 
-.shell li:before {
+.frame li:before {
     content: "";
     position: absolute;
     height: 100%;
@@ -63,24 +63,24 @@
     z-index: -1;
 }
 
-.shell li.highlight {
+.frame li.highlight {
     position: relative;
 }
 
-.shell li.highlight:before {
+.frame li.highlight:before {
     background: rgba(0,255,0,.5);
     z-index: 2;
 }
 
-.shell div > img {
+.frame div > img {
     display: block;
-    /*filter: grayscale(1);*/
+    filter: grayscale(1);
     z-index: -1;
     transition: all 0.2s;
 }
 
-.shell img[data-overlay="show"]  {
-    /*filter: grayscale(0);*/
+.frame img[data-overlay="show"]  {
+    filter: grayscale(0);
 }
 
 .no-select {

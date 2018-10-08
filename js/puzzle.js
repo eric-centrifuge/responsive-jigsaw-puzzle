@@ -4,14 +4,14 @@ document.addEventListener('DOMContentLoaded',function($) {
     if (window.NodeList && !NodeList.prototype.forEach) {
       NodeList.prototype.forEach = function (callback, thisArg) {
           thisArg = thisArg || window;
-          for (var i = 0; i < this.length; i++) {
+          for (let i = 0; i < this.length; i++) {
               callback.call(thisArg, this[i], i, this);
           }
       };
     }
 
     this.Puzzle = function(opts) {
-        var instance = this;
+        const instance = this;
         this.container;
         this.fullImg = new Image();
         this.grid;
@@ -24,6 +24,9 @@ document.addEventListener('DOMContentLoaded',function($) {
             numcolumns     : 3,
             numrows        : 3,
             difficulty     : "normal",
+            dropped        : function(evt) { },
+            correct        : function(evt) { },
+            finished       : function(evt) { },
             debug          : false,
         };
 
@@ -41,9 +44,9 @@ document.addEventListener('DOMContentLoaded',function($) {
                 return false;
             }
 
-            // execute remain functions after image loads
-            var img = new Image();
-            var width,height;
+            // execute remaining functions after image loads
+            let img = new Image();
+            let width,height;
             img.onload = function() {
                 // set max height to viewport height
                 if(this.height > window.innerHeight) {
@@ -72,7 +75,7 @@ document.addEventListener('DOMContentLoaded',function($) {
         }
 
         this.setOpts = function(opts) {
-            var usropts = (opts) ? opts : instance.settings;
+            let usropts = (opts) ? opts : instance.settings;
 
             // set user options
             Object.keys(instance.usropts).forEach(function(key) {
@@ -124,7 +127,7 @@ document.addEventListener('DOMContentLoaded',function($) {
         }
 
         this.setImage = function(src) {
-            var tmpImg = new Image();
+            let tmpImg = new Image();
             tmpImg.onload = function() {
                 instance.usropts.image = src;
             }
@@ -134,10 +137,10 @@ document.addEventListener('DOMContentLoaded',function($) {
         }
 
         this.isSorted = function(array) {
-            var array = (array) ? array : instance.getTiles();
-            var i = 0;
-            var keys = Object.keys(array);
-            var totalelements = array.length;
+            array = (array) ? array : instance.getTiles();
+            let i = 0;
+            let keys = Object.keys(array);
+            let totalelements = array.length;
 
             while (totalelements > 1) {
                 // Compare current index against original index
@@ -153,11 +156,11 @@ document.addEventListener('DOMContentLoaded',function($) {
         }
 
         this.getTiles = function() {
-            var array=[];
+            let array=[];
 
             instance.grid.childNodes.forEach(function(child,index){
                 if(child.nodeType != 3 && child.nodeName != 'IMG') {
-                    var arr = [];
+                    let arr = [];
                     arr[0] = Number(child.children[0].dataset.position) - 1;
                     arr[1] = child.children[0];
                     array[index] = arr;
@@ -169,11 +172,11 @@ document.addEventListener('DOMContentLoaded',function($) {
         }
 
         this.correctTiles = function(array) {
-            var array = (array) ? array : instance.getTiles();
-            var i = 0;
-            var keys = Object.keys(array);
-            var totalelements = array.length;
-            var number_correct = 0;
+            array = (array) ? array : instance.getTiles();
+            let i = 0;
+            let keys = Object.keys(array);
+            let totalelements = array.length;
+            let number_correct = 0;
 
             while (totalelements > 0) {
                 
@@ -194,22 +197,13 @@ document.addEventListener('DOMContentLoaded',function($) {
 
     // Private Methods
         function setEventHandlers(grid) {
-            var afterImage;
-            var lastPlace;
-            var divs = document.querySelectorAll(".shell li div");
-            var homeEvt = new CustomEvent('home', {
-                detail: {
-                    self: instance,
-                }
-            });
+            let afterImage;
+            let lastPlace;
+            let divs = document.querySelectorAll(".frame li div");
 
             divs.forEach(function(div){
-                div.addEventListener('home', function(evt){
-                    // ...
-
-                    if(instance.settings.debug) {
-                        console.info(evt);
-                    }
+                div.addEventListener('home', function(evt) {
+                    return evt;
                 });
             });
 
@@ -238,10 +232,10 @@ document.addEventListener('DOMContentLoaded',function($) {
                 });
             });
 
-            $(".shell li div").draggable({
+            $(".frame li div").draggable({
                 revert: true,
                 zIndex: 3,
-                snap: ".shell li",
+                snap: ".frame li",
                 snapMode: "inner",
                 snapTolerance: 10,
                 create: function(event, ui) {
@@ -262,8 +256,9 @@ document.addEventListener('DOMContentLoaded',function($) {
                 if(child.nodeType != 3 && child.nodeName != 'IMG') {
                     $(child).droppable({
                         drop: function(event, ui) {
-                            var tile = ui.draggable;
-                            var slot  = this;
+                            let tile = ui.draggable;
+                            let slot = this;
+                            let prevTile = slot.children[0];
 
                             $(this).removeClass('highlight');
 
@@ -279,18 +274,57 @@ document.addEventListener('DOMContentLoaded',function($) {
                                 .css({ top: 0, left: 0 })
                                 .prependTo($(slot));
 
+                            // check correct number of tiles
                             instance.correctTiles();
+                            let tileInPlace = ( Array.from(instance.grid.children).indexOf(slot) == 
+                                                Number(tile[0].dataset.position) - 1 );
+                            let prevTileInPlace = ( Array.from(instance.grid.children).indexOf(prevTile.parentNode) == 
+                                                    Number(prevTile.dataset.position) - 1 );
 
+                            // prepare custom event
+                            let homeEvt = new CustomEvent('home', {
+                                detail: {
+                                    self: instance,
+                                    tile: 
+                                    {
+                                        el: tile[0],
+                                        position: tile[0].dataset.position,
+                                        inPlace: tileInPlace,
+                                    },
+                                    prevTile: 
+                                    {
+                                        el: prevTile,
+                                        position: prevTile.dataset.position,
+                                        inPlace: prevTileInPlace,
+                                    }
+                                }
+                            });
+
+                            // trigger custom event on drop
+                            if( instance.settings.dropped
+                                && typeof instance.settings.dropped === "function") {
+                                instance.settings.dropped(homeEvt);
+                            }
+
+                            // puzzle completed state
                             if (instance.isSorted(instance.getTiles())) {
-                                $(instance.fullImg).css({'opacity':1,'z-index':1});
+                                // user defined callback
+                                if( instance.settings.finished 
+                                    && typeof instance.settings.finished === "function") {
+                                    instance.settings.finished(homeEvt);
+                                }
                             }
 
-
-                            if (Array.from(instance.grid.children).indexOf(slot) == Number(tile[0].dataset.position) - 1) {
-                                tile[0].dispatchEvent(homeEvt);
+                            // check if current tile is placed correctly
+                            if (tileInPlace || prevTileInPlace) {
+                                // user defined callbacks
+                                if( instance.settings.correct 
+                                    && typeof instance.settings.correct === "function") {
+                                    instance.settings.correct(homeEvt);
+                                }
                             }
 
-                            // debugger
+                            // debug output
                             if (instance.settings.debug) {
                                 console.info(instance);
                                 console.info("Dropped tile #" + (Number(tile[0].dataset.position)) + " in slot #" + (Array.from(instance.grid.children).indexOf(slot) + 1));
@@ -314,11 +348,11 @@ document.addEventListener('DOMContentLoaded',function($) {
         }
 
         function setFrameDimensions(grid,container) {
-            var containerWidth = container.offsetWidth;
+            let containerWidth = container.offsetWidth;
 
             // accounts for left/right padding
-            var padding = 0;
-            var paddingArr = [
+            let padding = 0;
+            let paddingArr = [
                 window.getComputedStyle(container).paddingRight,
                 window.getComputedStyle(container).paddingLeft,
             ];
@@ -337,19 +371,19 @@ document.addEventListener('DOMContentLoaded',function($) {
         }
 
         function buildGrid(numcolumns,numrows) {
-            var gridArr = [];
-            var i = 0;
-            var currentRow = 0;
-            var currentColumn = 1;
+            let gridArr = [];
+            let i = 0;
+            let currentRow = 0;
+            let currentColumn = 1;
             instance.grid = document.createElement('ul');
             instance.gridSize = numcolumns * numrows;
 
             while(i<instance.gridSize) {
                 // build html
-                var tmpLi = document.createElement('li');
-                var tmpDiv = document.createElement('div');
-                var tmpImg = document.createElement('img');
-                var tmpArr = [];
+                let tmpLi = document.createElement('li');
+                let tmpDiv = document.createElement('div');
+                let tmpImg = document.createElement('img');
+                let tmpArr = [];
 
                 $(tmpLi).css({
                     'height'    : (100/numrows)+'%',
@@ -357,7 +391,6 @@ document.addEventListener('DOMContentLoaded',function($) {
                     'flex'      : '1 0 '+(100/numcolumns)+'%'
                 });
 
-                tmpDiv.classList.add('puzzle');
                 tmpDiv.dataset.position = i+1;
                 
                 tmpImg.src = instance.settings.image;
@@ -380,7 +413,6 @@ document.addEventListener('DOMContentLoaded',function($) {
                     currentColumn = 1;
                 }
 
-
                 // Append elements
                 tmpDiv.appendChild(tmpImg);
                 tmpLi.appendChild(tmpDiv);
@@ -390,7 +422,7 @@ document.addEventListener('DOMContentLoaded',function($) {
                 i++;
             }
 
-            instance.grid.classList.add("shell");
+            instance.grid.classList.add("frame");
             instance.grid.classList.add("no-select");
 
             gridArr = shuffleArr(gridArr);
@@ -408,8 +440,8 @@ document.addEventListener('DOMContentLoaded',function($) {
         }
 
         function shuffleArr(array) {
-            var shuffle_limit = array.length - Math.ceil(array.length * instance.difficulty);
-            var m = array.length, t, i;
+            let shuffle_limit = array.length - Math.ceil(array.length * instance.difficulty);
+            let m = array.length, t, i;
 
             // keep shuffle limit under total items
             shuffle_limit = (shuffle_limit < (m - 1)) ? shuffle_limit : 0;

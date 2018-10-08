@@ -92,8 +92,10 @@
             var puzzle1 = document.querySelector('#puzzle1');
             puzzle1.pz = new Puzzle({
                 "el"         : puzzle1,
-                "image"      : image,
                 "difficulty" : "expert",
+                finished     :  function(evt) {
+                                    // $(evt.detail.self.fullImg).css({'opacity':1,'z-index':1})
+                                },
             }).init();
 
             // update buttons
