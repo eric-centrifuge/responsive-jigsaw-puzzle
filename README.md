@@ -139,6 +139,17 @@ Counts the number of tiles in order and returns that number.
 
 **returns** number value of correct tiles.
 
+## Callbacks
+
+You can pass callback functions for the following events:
+
+* __Dropped__ - When a tile is dropped into a slot.
+* __Correct__ - When a tile is dropped into the correct slot.
+* __Finished__ - When the entire puzzle is completed.
+
+To use callbacks pass a custom function to one of the above events in your initial settings. 
+
+Each callback is passed a custom event object that includes a reference to the puzzle instance as well as other useful information.
 
 ## Running the tests
 
