@@ -220,7 +220,6 @@ document.addEventListener('DOMContentLoaded',function($) {
             document.addEventListener('transitionend',function(evt){
                 evt.target.classList.remove('animate');
                 evt.target.style.zIndex = 1;
-                evt.target.parentNode.style.zIndex = 1;
             });
 
             tiles.forEach(function(tile){
@@ -228,7 +227,7 @@ document.addEventListener('DOMContentLoaded',function($) {
                     return evt;
                 });
 
-                let clone = tile.parentNode.cloneNode(true);
+                let clone = tile.cloneNode(true);
                 let startX;
                 let startY;
                 let screentStartX;
@@ -237,7 +236,7 @@ document.addEventListener('DOMContentLoaded',function($) {
 
                 // Set X/Y position for when tile is dragged
 
-                tile.parentNode.addEventListener('mousemove',function(evt){
+                tile.addEventListener('mousemove',function(evt){
                     startX = evt.offsetX;
                     startY = evt.offsetY;
                     screenStartX = evt.clientX;
@@ -246,8 +245,8 @@ document.addEventListener('DOMContentLoaded',function($) {
 
                 // Mouse events
 
-                tile.parentNode.addEventListener('mousedown', function(evt) {
-                    this.children[0].classList.add('highlight');
+                tile.addEventListener('mousedown', function(evt) {
+                    this.classList.add('highlight');
                     $(clone).css({
                         'position':'absolute',
                         'opacity':'.4',
@@ -261,6 +260,11 @@ document.addEventListener('DOMContentLoaded',function($) {
                     });
                     lastPlace = clone;
                     this.parentNode.appendChild(clone);
+                });
+
+                tile.addEventListener('mouseup', function(evt){
+                    this.classList.remove('highlight');
+                    this.style.transform = "";
                 });
                 
                 // Drag events
@@ -283,7 +287,7 @@ document.addEventListener('DOMContentLoaded',function($) {
                     }
                 });
 
-                tile.parentNode.addEventListener('drag',function(evt){
+                tile.addEventListener('drag', function(evt){
                     if( mouseY > startY &&
                         mouseX > startX &&
                         mouseY < window.innerHeight - (evt.target.offsetHeight - startY) &&
@@ -293,7 +297,7 @@ document.addEventListener('DOMContentLoaded',function($) {
                     }
                 });
 
-                tile.parentNode.addEventListener('dragend',function(evt){
+                tile.addEventListener('dragend',function(evt){
                     // Slight delay to smoothly move tile back in place
                     setTimeout(function(){
                         evt.target.classList.add('animate');
@@ -344,23 +348,30 @@ document.addEventListener('DOMContentLoaded',function($) {
                 });
 
                 // Reset tile
-                tile.parentNode.addEventListener('transitionend', function(evt) {
+
+                tile.addEventListener('transitionend', function(evt) {
                     // Remove highlight
                     if (evt.target.style.transform == "translate(0px, 0px)") {   
                         this.parentNode.removeChild(lastPlace);
-                        this.children[0].classList.remove('highlight');
+                        this.classList.remove('highlight');
                         this.style.zIndex = 1;
+                        this.parentNode.style.zIndex = "";
                         this.style.transform = "";
                     }
                 });
             });
 
-            slots.forEach(function(slot){
-                slot.addEventListener('dragover',function(evt) {
+            slots.forEach(function(slot) {
+                slot.addEventListener('dragenter', function(evt) {
+                    evt.preventDefault();
+                    console.log(evt.target,this);
                     if(evt.target.parentNode != this) {
-                        console.log(evt.target);
                         this.classList.add('highlight');
                     }
+                });
+
+                slot.addEventListener('drop', function(evt) {
+                    console.log(evt.target);
                 });
             });
 
@@ -547,9 +558,9 @@ document.addEventListener('DOMContentLoaded',function($) {
                     'max-width' : (100/numcolumns)+'%',
                     'flex'      : '1 0 '+(100/numcolumns)+'%'
                 });
-                tmpLi.draggable = "true";
 
                 tmpDiv.dataset.position = i+1;
+                tmpDiv.draggable = "true";
                 
                 tmpImg.src = instance.settings.image;
                 tmpImg.style.position = "relative";
