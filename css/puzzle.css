@@ -19,6 +19,7 @@
 .frame li {
     display: inline-block;
     position: relative;
+    cursor: pointer;
     animation: zoomIn 0.2s;
 }
 
@@ -38,7 +39,7 @@
     outline: 1px solid #000;
     box-sizing: border-box;
     overflow: hidden;
-    cursor: pointer;
+    pointer-events: none;
 }
 
 .frame div:before {
@@ -65,6 +66,7 @@
     height: 100%;
     width: 100%;
     z-index: -1;
+    transition: 0.1s all;
 }
 
 .frame li.highlight {

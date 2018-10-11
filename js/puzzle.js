@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded',function($) {
         this.container;
         this.fullImg = new Image();
         this.grid;
+        this.key;
         this.gridSize;
         this.usropts = opts;
         this.difficulty;
@@ -219,24 +220,25 @@ document.addEventListener('DOMContentLoaded',function($) {
             // Reset animation class
             document.addEventListener('transitionend',function(evt){
                 evt.target.classList.remove('animate');
-                evt.target.style.zIndex = 1;
             });
 
-            tiles.forEach(function(tile){
-                tile.addEventListener('home', function(evt) {
+            slots.forEach(function(slot,index,collection){
+                slot.addEventListener('home', function(evt) {
                     return evt;
                 });
 
-                let clone = tile.cloneNode(true);
+                let clone = slot.cloneNode(true);
+                let isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
+                let key = 0;
                 let startX;
                 let startY;
                 let screentStartX;
                 let screenStartY;
                 let lastPlace;
 
-                // Set X/Y position for when tile is dragged
+                // Set X/Y position for when slot is dragged
 
-                tile.addEventListener('mousemove',function(evt){
+                slot.addEventListener('mousemove', function(evt){
                     startX = evt.offsetX;
                     startY = evt.offsetY;
                     screenStartX = evt.clientX;
@@ -245,8 +247,8 @@ document.addEventListener('DOMContentLoaded',function($) {
 
                 // Mouse events
 
-                tile.addEventListener('mousedown', function(evt) {
-                    this.classList.add('highlight');
+                slot.addEventListener('mousedown', function(evt) {
+                    this.children[0].classList.add('highlight');
                     $(clone).css({
                         'position':'absolute',
                         'opacity':'.4',
@@ -254,260 +256,215 @@ document.addEventListener('DOMContentLoaded',function($) {
                         'left': this.getBoundingClientRect().left - this.parentNode.getBoundingClientRect().left,
                         'margin-top':'0',
                         'margin-left':'0',
-                        'z-index':'-1',
+                        'z-index':'-2',
                         'overflow':'hidden',
                         'outline':'1px solid #000'
                     });
-                    lastPlace = clone;
-                    this.parentNode.appendChild(clone);
+                    this.draggable = true;
                 });
 
-                tile.addEventListener('mouseup', function(evt){
-                    this.classList.remove('highlight');
+                slot.addEventListener('mouseup', function(evt){
+                    this.children[0].classList.remove('highlight');
                     this.style.transform = "";
+                    this.removeAttribute('draggable');
                 });
                 
                 // Drag events
 
-                tile.parentNode.addEventListener('dragstart',function(evt){
-                    let isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
+                slot.addEventListener('dragstart',function(evt){
                     let dt = evt.dataTransfer;
 
                     if (isIE11) {
-                        //Well if we cannot remove the ghost image then we need to make the initial image invisible when a ghost image would be captured
-                        //then make the item visible again.
-                        var initialDisplay = evt.srcElement.style.display;
-                        evt.srcElement.style.display = "none";
-                        window.setTimeout(function(){
-                            evt.srcElement.style.display = initialDisplay;
-                        });
+                        // var initialDisplay = evt.srcElement.style.display;
+                        // evt.srcElement.style.display = "none";
+                        // window.setTimeout(function(){
+                        //     evt.srcElement.style.display = initialDisplay;
+                        // });
                     } else {    
                         dt.setDragImage(new Image(),0,0);
-                        dt.setData('text/html','<p>test</p>');
+                        dt.setData('key',index);
                     }
+
+                    // Set key to index of dragged element
+                    let slot = this;
+                    Object.keys(collection).forEach(function(index) {
+                        if (collection[index].children[0].dataset.position == slot.children[0].dataset.position ) {
+                            instance.key = index;
+                        }
+                    });
                 });
 
-                tile.addEventListener('drag', function(evt){
+                slot.addEventListener('drag', function(evt){
                     if( mouseY > startY &&
                         mouseX > startX &&
                         mouseY < window.innerHeight - (evt.target.offsetHeight - startY) &&
                         mouseX < window.innerWidth - (evt.target.offsetWidth - startX)) {
-                        evt.target.style.zIndex = 10;
-                        evt.target.style.transform = "translate(" + (mouseX - screenStartX) + "px," + (mouseY - screenStartY) + "px" + ")";
+                        // evt.target.style.transform = "translate(" + (mouseX - screenStartX) + "px," + (mouseY - screenStartY) + "px" + ")";
                     }
                 });
 
-                tile.addEventListener('dragend',function(evt){
-                    // Slight delay to smoothly move tile back in place
+                slot.addEventListener('dragend', function(evt){
+                    // Slight delay to smoothly move slot back in place
                     setTimeout(function(){
                         evt.target.classList.add('animate');
                         evt.target.style.transform = "translate(0px,0px)";
-                    },100);
+                    }, 100);
                 });
 
                 // Touch events for mobile
 
-                tile.addEventListener('touchstart',function(evt) {
+                slot.addEventListener('touchstart',function(evt) {
                     startY = Math.round(evt.touches[0].clientY - evt.target.getBoundingClientRect().top);
                     startX = Math.round(evt.touches[0].clientX - evt.target.getBoundingClientRect().left);
                     screenStartX = evt.touches[0].clientX;
                     screenStartY = evt.touches[0].clientY;
 
-                    this.classList.add('highlight');
-                    afterImage = this.cloneNode(true);
-                    $(afterImage).css({
+                    this.children[0].classList.add('highlight');
+                    lastPlace = this.cloneNode(true);
+                    $(lastPlace).css({
                         'position':'absolute',
                         'opacity':'.4',
-                        'top':'0',
-                        'left':'0',
+                        'top': this.getBoundingClientRect().top - this.parentNode.getBoundingClientRect().top,
+                        'left': this.getBoundingClientRect().left - this.parentNode.getBoundingClientRect().left,
                         'margin-top':'0',
                         'margin-left':'0',
                         'z-index':'-1',
                     });
-                    lastPlace = this.parentNode;
-                    lastPlace.appendChild(afterImage);
+                    this.parentNode.appendChild(lastPlace);
+                    this.style.zIndex = 10;
                 });
 
-                tile.addEventListener('touchmove',function(evt) {
+                slot.addEventListener('touchmove',function(evt) {
                     if( evt.touches[0].clientY > startY &&
                         evt.touches[0].clientX > startX &&
                         evt.touches[0].clientY < window.innerHeight - (evt.target.offsetHeight - startY) &&
                         evt.touches[0].clientX < window.innerWidth - (evt.target.offsetWidth - startX)) {
-                        evt.target.style.zIndex = 10;
-                        evt.target.parentNode.style.zIndex = 10;
-                        evt.target.style.transform = "translate(" + (evt.touches[0].clientX - screenStartX) + "px," + (evt.touches[0].clientY - screenStartY) + "px" + ")";
+                        // evt.target.style.zIndex = 10;
+                        // evt.target.parentNode.style.zIndex = 10;
+                        // evt.target.style.transform = "translate(" + (evt.touches[0].clientX - screenStartX) + "px," + (evt.touches[0].clientY - screenStartY) + "px" + ")";
                     }
                 });
 
-                tile.addEventListener('touchend',function(evt){
-                    // Slight delay to smoothly move tile back in place
+                slot.addEventListener('touchend',function(evt){
+                    // Slight delay to smoothly move slot back in place
                     setTimeout(function(){
                         evt.target.classList.add('animate');
                         evt.target.style.transform = "translate(0px,0px)";
                     },100);
                 });
 
-                // Reset tile
+                // Reset slot
 
-                tile.addEventListener('transitionend', function(evt) {
+                slot.addEventListener('transitionend', function(evt) {
                     // Remove highlight
                     if (evt.target.style.transform == "translate(0px, 0px)") {   
-                        this.parentNode.removeChild(lastPlace);
-                        this.classList.remove('highlight');
-                        this.style.zIndex = 1;
-                        this.parentNode.style.zIndex = "";
+                        lastPlace.remove();
+                        this.children[0].classList.remove('highlight');
+                        this.style.zIndex = "";
                         this.style.transform = "";
                     }
                 });
-            });
 
-            slots.forEach(function(slot) {
-                slot.addEventListener('dragenter', function(evt) {
+                // Drop events
+
+                slot.addEventListener('dragenter', function(evt){
                     evt.preventDefault();
-                    console.log(evt.target,this);
-                    if(evt.target.parentNode != this) {
+                    if (!this.draggable) {
                         this.classList.add('highlight');
                     }
                 });
 
-                slot.addEventListener('drop', function(evt) {
-                    console.log(evt.target);
+                slot.addEventListener('dragover', function(evt){
+                    evt.preventDefault();
                 });
-            });
 
-            // tiles.forEach(function(tile){
-            //     tile.addEventListener('mousedown', function(evt) {
-            //         this.classList.add('highlight');
-            //         afterImage = this.cloneNode(true);
-            //         $(afterImage).css({
-            //             'position':'absolute',
-            //             'opacity':'.4',
-            //             'top':'0',
-            //             'left':'0',
-            //             'margin-top':'0',
-            //             'margin-left':'0',
-            //             'z-index':'-1'
-            //         });
-            //         lastPlace = this.parentNode;
-            //         lastPlace.appendChild(afterImage);
-            //     });
+                slot.addEventListener('dragleave',function(evt){
+                    evt.preventDefault();
+                    if (!this.draggable) {
+                        this.classList.remove('highlight');
+                    }
+                });
 
-            //     tile.addEventListener('mouseup', function(evt) {
-            //         lastPlace.removeChild(lastPlace.children[1]);
-            //         this.classList.remove('highlight');
-            //         this.style.background = 'transparent';
-            //         this.style.zIndex = 1;
-            //     });
-            // });
+                slot.addEventListener('drop', function(evt){
+                    evt.preventDefault();
 
-            // $(".frame li div").draggable({
-            //     revert: true,
-            //     zIndex: 3,
-            //     snap: ".frame li",
-            //     snapMode: "inner",
-            //     snapTolerance: 10,
-            //     create: function(event, ui) {
+                    let slot = this;
+                    let dragSlot = slots[instance.key];
+                    let tile = slot.children[0];
+                    let dragTile = dragSlot.children[0];
 
-            //     },
-            //     start: function (event, ui) {
-                    
-            //     },
-            //     drag: function (event, ui) {
-                    
-            //     },
-            //     stop: function (event, ui) {
-                    
-            //     }
-            // });
+                    // Remove highlights
+                    dragTile.classList.remove('highlight');
+                    slot.classList.remove('highlight');
 
-            instance.grid.childNodes.forEach(function(child,index) {
-                if(child.nodeType != 3 && child.nodeName != 'IMG') {
-                    // $(child).droppable({
-                    //     drop: function(event, ui) {
-                    //         let tile = ui.draggable;
-                    //         let slot = this;
-                    //         let prevTile = slot.children[0];
+                    // Disable drag
+                    dragSlot.removeAttribute('draggable');
+                    slot.removeAttribute('draggable');
 
-                    //         $(this).removeClass('highlight');
+                    // Swap tiles
+                    slot.appendChild(dragTile);
+                    dragSlot.appendChild(tile);
 
-                    //         if ($(slot).children().length > 0) {
-                    //             $(slot)
-                    //                 .children()
-                    //                 .detach()
-                    //                 .prependTo($(lastPlace));
-                    //         }
+                    // check correct number of tiles
+                    instance.correctTiles();
 
-                    //         $(tile)
-                    //             .detach()
-                    //             .css({ top: 0, left: 0 })
-                    //             .prependTo($(slot));
+                    let tileInPlace = ( Array.from(instance.grid.children).indexOf(slot) == 
+                                        Number(tile.dataset.position) - 1 );
+                    let prevTileInPlace = ( Array.from(instance.grid.children).indexOf(dragSlot.parentNode) == 
+                                            Number(dragTile.dataset.position) - 1 );
 
-                    //         // check correct number of tiles
-                    //         instance.correctTiles();
-                    //         let tileInPlace = ( Array.from(instance.grid.children).indexOf(slot) == 
-                    //                             Number(tile[0].dataset.position) - 1 );
-                    //         let prevTileInPlace = ( Array.from(instance.grid.children).indexOf(prevTile.parentNode) == 
-                    //                                 Number(prevTile.dataset.position) - 1 );
+                    // prepare custom event
+                    let homeEvt = new CustomEvent('home', {
+                        detail: {
+                            self: instance,
+                            dropped: 
+                            {
+                                el: tile,
+                                position: tile.dataset.position,
+                                inPlace: tileInPlace,
+                            },
+                            dragged: 
+                            {
+                                el: dragTile,
+                                position: dragTile.dataset.position,
+                                inPlace: prevTileInPlace,
+                            }
+                        }
+                    });
 
-                    //         // prepare custom event
-                    //         let homeEvt = new CustomEvent('home', {
-                    //             detail: {
-                    //                 self: instance,
-                    //                 tile: 
-                    //                 {
-                    //                     el: tile[0],
-                    //                     position: tile[0].dataset.position,
-                    //                     inPlace: tileInPlace,
-                    //                 },
-                    //                 prevTile: 
-                    //                 {
-                    //                     el: prevTile,
-                    //                     position: prevTile.dataset.position,
-                    //                     inPlace: prevTileInPlace,
-                    //                 }
-                    //             }
-                    //         });
+                    // trigger custom event on drop
+                    if( instance.settings.dropped
+                        && typeof instance.settings.dropped === "function") {
+                        instance.settings.dropped(homeEvt);
+                    }
 
-                    //         // trigger custom event on drop
-                    //         if( instance.settings.dropped
-                    //             && typeof instance.settings.dropped === "function") {
-                    //             instance.settings.dropped(homeEvt);
-                    //         }
+                    // puzzle completed state
+                    if (instance.isSorted(instance.getTiles())) {
+                        // user defined callback
+                        if( instance.settings.finished 
+                            && typeof instance.settings.finished === "function") {
+                            instance.settings.finished(homeEvt);
+                        }
+                    }
 
-                    //         // puzzle completed state
-                    //         if (instance.isSorted(instance.getTiles())) {
-                    //             // user defined callback
-                    //             if( instance.settings.finished 
-                    //                 && typeof instance.settings.finished === "function") {
-                    //                 instance.settings.finished(homeEvt);
-                    //             }
-                    //         }
+                    // check if current tile is placed correctly
+                    if (tileInPlace || prevTileInPlace) {
+                        // user defined callbacks
+                        if( instance.settings.correct 
+                            && typeof instance.settings.correct === "function") {
+                            instance.settings.correct(homeEvt);
+                        }
+                    }
 
-                    //         // check if current tile is placed correctly
-                    //         if (tileInPlace || prevTileInPlace) {
-                    //             // user defined callbacks
-                    //             if( instance.settings.correct 
-                    //                 && typeof instance.settings.correct === "function") {
-                    //                 instance.settings.correct(homeEvt);
-                    //             }
-                    //         }
+                    // debug output
+                    if (instance.settings.debug) {
+                        console.info(instance);
+                        console.info("Dropped tile #" + (Number(tile[0].dataset.position)) + " in slot #" + (Array.from(instance.grid.children).indexOf(slot) + 1));
+                        console.info(tile[0]);
+                        console.info(slot);
+                    }
+                });
 
-                    //         // debug output
-                    //         if (instance.settings.debug) {
-                    //             console.info(instance);
-                    //             console.info("Dropped tile #" + (Number(tile[0].dataset.position)) + " in slot #" + (Array.from(instance.grid.children).indexOf(slot) + 1));
-                    //             console.info(tile[0]);
-                    //             console.info(slot);
-                    //         }
-                    //     },
-                    //     over: function(event, ui) {
-                    //         $(this).addClass('highlight');
-                    //     },
-                    //     out: function(event, ui) {
-                    //         $(this).removeClass('highlight');  
-                    //     }
-                    // });
-                }
             });
 
             window.addEventListener('resize',function(evt) {
@@ -558,9 +515,9 @@ document.addEventListener('DOMContentLoaded',function($) {
                     'max-width' : (100/numcolumns)+'%',
                     'flex'      : '1 0 '+(100/numcolumns)+'%'
                 });
+                // tmpLi.draggable = "true";
 
                 tmpDiv.dataset.position = i+1;
-                tmpDiv.draggable = "true";
                 
                 tmpImg.src = instance.settings.image;
                 tmpImg.style.position = "relative";
