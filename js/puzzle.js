@@ -358,7 +358,9 @@ document.addEventListener('DOMContentLoaded',function($) {
                 slot.addEventListener('transitionend', function(evt) {
                     // Remove highlight
                     if (evt.target.style.transform == "translate(0px, 0px)") {   
-                        lastPlace.remove();
+                        if(lastPlace != undefined) {
+                            lastPlace.remove();
+                        }
                         this.children[0].classList.remove('highlight');
                         this.style.zIndex = "";
                         this.style.transform = "";
