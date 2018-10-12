@@ -151,7 +151,7 @@ These events are exposed through the settings and accept callback functions:
 
 To use callbacks pass a custom function to one of the above events in your initial settings. 
 
-Each callback is passed a custom event object that includes a reference to the puzzle instance as well as other useful information.
+Each callback is passed a custom object that includes a reference to the puzzle instance, the event and the event target.
 
 ## Running the tests
 
