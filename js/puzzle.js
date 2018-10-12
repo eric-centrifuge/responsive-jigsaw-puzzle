@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded',function(){
         this.settings = {
             el             : null,
             image          : 'http://ansimuz.com/site/wp-content/uploads/2015/01/making-mega-man-big.png',
+            fullImg        : null,
             numcolumns     : 3,
             numrows        : 3,
             difficulty     : "normal",
@@ -772,13 +773,13 @@ document.addEventListener('DOMContentLoaded',function(){
             gridArr = shuffleArr(gridArr);
             gridArr.forEach(function(piece,index,arr) {
                 instance.grid.appendChild(piece[1]);
-                instance.grid.appendChild(instance.fullImg);
             });
 
-            instance.fullImg.src = instance.settings.image;
+            instance.fullImg.src = (instance.settings.fullImg) ? instance.settings.fullImg : instance.settings.image;
             instance.fullImg.classList.add('full-img');
             instance.fullImg.style.opacity = 0;
             instance.fullImg.style.zIndex = -1;
+            instance.grid.appendChild(instance.fullImg);
 
             return instance.grid;
         }
