@@ -16,6 +16,16 @@ document.addEventListener('DOMContentLoaded',function($) {
         this.fullImg = new Image();
         this.grid;
         this.key;
+        this.mouseX;
+        this.mouseY;
+        this.startX;
+        this.startY;
+        this.touchSlot;
+        this.screentStartX;
+        this.screenStartY;
+        this.clientX
+        this.clientY;
+        this.lastPlace;
         this.gridSize;
         this.usropts = opts;
         this.difficulty;
@@ -183,10 +193,12 @@ document.addEventListener('DOMContentLoaded',function($) {
                 
                 // Compare current index against original index
                 if (Number(keys[i]) == Number(array[i][0])) {
+                    array[i][1].style.pointerEvents = "none";
                     array[i][1].children[0].dataset.overlay = 'show';
                     number_correct++;
                 } else {
                     array[i][1].children[0].dataset.overlay = '';
+                    array[i][1].style.pointerEvents = "";
                 }
 
                 i++;
@@ -198,23 +210,18 @@ document.addEventListener('DOMContentLoaded',function($) {
 
         // Private Methods
         function setEventHandlers(grid) {
-            let afterImage;
-            let lastPlace;
-            let slots = document.querySelectorAll(".frame li");
-            let tiles = document.querySelectorAll(".frame li div");
-            let mouseX;
-            let mouseY;
+            let slots = instance.grid.children;
 
             // Define mouse position while dragging tile
             document.addEventListener('dragover',function(evt){
-                mouseX = evt.clientX;
-                mouseY = evt.clientY;
+                instance.mouseX = evt.clientX;
+                instance.mouseY = evt.clientY;
             });
 
             // Reset mouse position after tile has been let go
             document.addEventListener('mousemove',function(evt){
-                mouseX = evt.clientX;
-                mouseY = evt.clientY;
+                instance.mouseX = evt.clientX;
+                instance.mouseY = evt.clientY;
             });
 
             // Reset animation class
@@ -222,48 +229,75 @@ document.addEventListener('DOMContentLoaded',function($) {
                 evt.target.classList.remove('animate');
             });
 
-            slots.forEach(function(slot,index,collection){
-                slot.addEventListener('home', function(evt) {
+            // Use document move event to hover over other elements
+            document.addEventListener('touchmove', function(evt) {
+                if( evt.touches[0].clientY > instance.startY &&
+                    evt.touches[0].clientX > instance.startX &&
+                    evt.touches[0].clientY < window.innerHeight - (instance.touchSlot.offsetHeight - instance.startY) &&
+                    evt.touches[0].clientX < window.innerWidth - (instance.touchSlot.offsetWidth - instance.startX)) {
+                    instance.touchSlot.style.zIndex = 10;
+                    instance.touchSlot.style.pointerEvents = "none";
+                    instance.touchSlot.style.transform = "translate(" + (evt.touches[0].clientX - instance.screenStartX) + "px," + (evt.touches[0].clientY - instance.screenStartY) + "px" + ")";
+
+                    Object.keys(slots).forEach(function(index) {
+                        let top = slots[index].getBoundingClientRect().top;
+                        let bottom = slots[index].getBoundingClientRect().bottom;
+                        let right = slots[index].getBoundingClientRect().right;
+                        let left = slots[index].getBoundingClientRect().left;
+
+                        if ( evt.touches[0].clientX > left &&
+                             evt.touches[0].clientX < right &&
+                             evt.touches[0].clientY > top &&
+                             evt.touches[0].clientY < bottom &&
+                             slots[index] != instance.touchSlot &&
+                             slots[index].tagName != "IMG" ) {
+                            
+                            if (!slots[index].draggable) {
+                                // Clear highlights of all other elements
+                                Object.keys(instance.grid.children).forEach(function(key) {
+                                    instance.grid.children[key].classList.remove('highlight');
+                                });
+
+                                slots[index].classList.add('highlight');
+                            }
+                        }
+
+                        instance.clientX = evt.touches[0].clientX;
+                        instance.clientY = evt.touches[0].clientY;
+                    });
+                }
+            });
+
+            Object.keys(slots).forEach(function(index) {
+                slots[index].addEventListener('home', function(evt) {
                     return evt;
                 });
 
-                let clone = slot.cloneNode(true);
+                let clone = slots[index].cloneNode(true);
                 let isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
                 let key = 0;
-                let startX;
-                let startY;
-                let screentStartX;
-                let screenStartY;
-                let lastPlace;
-
+                
                 // Set X/Y position for when slot is dragged
 
-                slot.addEventListener('mousemove', function(evt){
-                    startX = evt.offsetX;
-                    startY = evt.offsetY;
-                    screenStartX = evt.clientX;
-                    screenStartY = evt.clientY;
+                slots[index].addEventListener('mousemove', function(evt){
+                    instance.startX = evt.offsetX;
+                    instance.startY = evt.offsetY;
+                    instance.screenStartX = evt.clientX;
+                    instance.screenStartY = evt.clientY;
                 });
 
                 // Mouse events
 
-                slot.addEventListener('mousedown', function(evt) {
+                slots[index].addEventListener('mousedown', function(evt) {
                     this.children[0].classList.add('highlight');
-                    $(clone).css({
-                        'position':'absolute',
-                        'opacity':'.4',
-                        'top': this.getBoundingClientRect().top - this.parentNode.getBoundingClientRect().top,
-                        'left': this.getBoundingClientRect().left - this.parentNode.getBoundingClientRect().left,
-                        'margin-top':'0',
-                        'margin-left':'0',
-                        'z-index':'-2',
-                        'overflow':'hidden',
-                        'outline':'1px solid #000'
-                    });
+                    
+                    // Show ghost image
+                    addAfterImage(this);
+
                     this.draggable = true;
                 });
 
-                slot.addEventListener('mouseup', function(evt){
+                slots[index].addEventListener('mouseup', function(evt){
                     this.children[0].classList.remove('highlight');
                     this.style.transform = "";
                     this.removeAttribute('draggable');
@@ -271,7 +305,7 @@ document.addEventListener('DOMContentLoaded',function($) {
                 
                 // Drag events
 
-                slot.addEventListener('dragstart',function(evt){
+                slots[index].addEventListener('dragstart',function(evt){
                     let dt = evt.dataTransfer;
 
                     if (isIE11) {
@@ -281,29 +315,29 @@ document.addEventListener('DOMContentLoaded',function($) {
                         //     evt.srcElement.style.display = initialDisplay;
                         // });
                     } else {    
-                        dt.setDragImage(new Image(),0,0);
-                        dt.setData('key',index);
+                        dt.setDragImage(new Image(),0,0); // set empty image to remove ghost image Chrome/Firefox
+                        dt.setData('key',''); // set empty data to allow drag in Firefox
                     }
 
                     // Set key to index of dragged element
-                    let slot = this;
-                    Object.keys(collection).forEach(function(index) {
-                        if (collection[index].children[0].dataset.position == slot.children[0].dataset.position ) {
-                            instance.key = index;
-                        }
-                    });
+                    instance.key = index;
                 });
 
-                slot.addEventListener('drag', function(evt){
-                    if( mouseY > startY &&
-                        mouseX > startX &&
-                        mouseY < window.innerHeight - (evt.target.offsetHeight - startY) &&
-                        mouseX < window.innerWidth - (evt.target.offsetWidth - startX)) {
-                        // evt.target.style.transform = "translate(" + (mouseX - screenStartX) + "px," + (mouseY - screenStartY) + "px" + ")";
+                slots[index].addEventListener('drag', function(evt){
+                    if( instance.mouseY > instance.startY &&
+                        instance.mouseX > instance.startX &&
+                        instance.mouseY < window.innerHeight - (evt.target.offsetHeight - instance.startY) &&
+                        instance.mouseX < window.innerWidth - (evt.target.offsetWidth - instance.startX)) {
+                        evt.target.style.zIndex = 10;
+                        evt.target.style.pointerEvents = "none";
+                        evt.target.style.transform = "translate(" + (instance.mouseX - instance.screenStartX) + "px," + (instance.mouseY - instance.screenStartY) + "px" + ")";
                     }
                 });
 
-                slot.addEventListener('dragend', function(evt){
+                slots[index].addEventListener('dragend', function(evt){
+                    // Reset element
+                    evt.target.style.pointerEvents = "";
+
                     // Slight delay to smoothly move slot back in place
                     setTimeout(function(){
                         evt.target.classList.add('animate');
@@ -311,152 +345,56 @@ document.addEventListener('DOMContentLoaded',function($) {
                     }, 100);
                 });
 
-                // Touch events for mobile
-
-                slot.addEventListener('touchstart',function(evt) {
-                    startY = Math.round(evt.touches[0].clientY - evt.target.getBoundingClientRect().top);
-                    startX = Math.round(evt.touches[0].clientX - evt.target.getBoundingClientRect().left);
-                    screenStartX = evt.touches[0].clientX;
-                    screenStartY = evt.touches[0].clientY;
-
-                    this.children[0].classList.add('highlight');
-                    lastPlace = this.cloneNode(true);
-                    $(lastPlace).css({
-                        'position':'absolute',
-                        'opacity':'.4',
-                        'top': this.getBoundingClientRect().top - this.parentNode.getBoundingClientRect().top,
-                        'left': this.getBoundingClientRect().left - this.parentNode.getBoundingClientRect().left,
-                        'margin-top':'0',
-                        'margin-left':'0',
-                        'z-index':'-1',
-                    });
-                    this.parentNode.appendChild(lastPlace);
-                    this.style.zIndex = 10;
-                });
-
-                slot.addEventListener('touchmove',function(evt) {
-                    if( evt.touches[0].clientY > startY &&
-                        evt.touches[0].clientX > startX &&
-                        evt.touches[0].clientY < window.innerHeight - (evt.target.offsetHeight - startY) &&
-                        evt.touches[0].clientX < window.innerWidth - (evt.target.offsetWidth - startX)) {
-                        // evt.target.style.zIndex = 10;
-                        // evt.target.parentNode.style.zIndex = 10;
-                        // evt.target.style.transform = "translate(" + (evt.touches[0].clientX - screenStartX) + "px," + (evt.touches[0].clientY - screenStartY) + "px" + ")";
-                    }
-                });
-
-                slot.addEventListener('touchend',function(evt){
-                    // Slight delay to smoothly move slot back in place
-                    setTimeout(function(){
-                        evt.target.classList.add('animate');
-                        evt.target.style.transform = "translate(0px,0px)";
-                    },100);
-                });
-
-                // Reset slot
-
-                slot.addEventListener('transitionend', function(evt) {
-                    // Remove highlight
-                    if (evt.target.style.transform == "translate(0px, 0px)") {   
-                        if(lastPlace != undefined) {
-                            lastPlace.remove();
-                        }
-                        this.children[0].classList.remove('highlight');
-                        this.style.zIndex = "";
-                        this.style.transform = "";
-                    }
-                });
-
                 // Drop events
 
-                slot.addEventListener('dragenter', function(evt){
+                slots[index].addEventListener('dragenter', function(evt){
                     evt.preventDefault();
                     if (!this.draggable) {
                         this.classList.add('highlight');
                     }
                 });
 
-                slot.addEventListener('dragover', function(evt){
+                slots[index].addEventListener('dragover', function(evt){
                     evt.preventDefault();
                 });
 
-                slot.addEventListener('dragleave',function(evt){
+                slots[index].addEventListener('dragleave',function(evt){
                     evt.preventDefault();
                     if (!this.draggable) {
                         this.classList.remove('highlight');
                     }
                 });
 
-                slot.addEventListener('drop', function(evt){
+                slots[index].addEventListener('drop', function(evt){
                     evt.preventDefault();
 
                     let slot = this;
                     let dragSlot = slots[instance.key];
-                    let tile = slot.children[0];
+                    let tile = slots[index].children[0];
                     let dragTile = dragSlot.children[0];
 
                     // Remove highlights
                     dragTile.classList.remove('highlight');
-                    slot.classList.remove('highlight');
+                    slots[index].classList.remove('highlight');
 
                     // Disable drag
                     dragSlot.removeAttribute('draggable');
-                    slot.removeAttribute('draggable');
+                    slots[index].removeAttribute('draggable');
+
+                    // Reset element
+                    dragSlot.style.zIndex = 10;
+                    dragSlot.style.pointerEvents = "";
+                    instance.lastPlace.remove();
 
                     // Swap tiles
-                    slot.appendChild(dragTile);
+                    slots[index].appendChild(dragTile);
                     dragSlot.appendChild(tile);
 
-                    // check correct number of tiles
+                    // Check correct number of tiles
                     instance.correctTiles();
 
-                    let tileInPlace = ( Array.from(instance.grid.children).indexOf(slot) == 
-                                        Number(tile.dataset.position) - 1 );
-                    let prevTileInPlace = ( Array.from(instance.grid.children).indexOf(dragSlot.parentNode) == 
-                                            Number(dragTile.dataset.position) - 1 );
-
-                    // prepare custom event
-                    let homeEvt = new CustomEvent('home', {
-                        detail: {
-                            self: instance,
-                            dropped: 
-                            {
-                                el: tile,
-                                position: tile.dataset.position,
-                                inPlace: tileInPlace,
-                            },
-                            dragged: 
-                            {
-                                el: dragTile,
-                                position: dragTile.dataset.position,
-                                inPlace: prevTileInPlace,
-                            }
-                        }
-                    });
-
-                    // trigger custom event on drop
-                    if( instance.settings.dropped
-                        && typeof instance.settings.dropped === "function") {
-                        instance.settings.dropped(homeEvt);
-                    }
-
-                    // puzzle completed state
-                    if (instance.isSorted(instance.getTiles())) {
-                        // user defined callback
-                        if( instance.settings.finished 
-                            && typeof instance.settings.finished === "function") {
-                            instance.settings.finished(homeEvt);
-                        }
-                    }
-
-                    // check if current tile is placed correctly
-                    if (tileInPlace || prevTileInPlace) {
-                        // user defined callbacks
-                        if( instance.settings.correct 
-                            && typeof instance.settings.correct === "function") {
-                            instance.settings.correct(homeEvt);
-                        }
-                    }
+                    // Run callback functions
+                    runCallBacks(slot,dragSlot,tile,dragTile);
 
                     // debug output
                     if (instance.settings.debug) {
@@ -467,11 +405,167 @@ document.addEventListener('DOMContentLoaded',function($) {
                     }
                 });
 
+                // Touch events for mobile
+
+                slots[index].addEventListener('touchstart', function(evt) {
+                    instance.startY = Math.round(evt.touches[0].clientY - evt.target.getBoundingClientRect().top);
+                    instance.startX = Math.round(evt.touches[0].clientX - evt.target.getBoundingClientRect().left);
+                    instance.screenStartX = evt.touches[0].clientX;
+                    instance.screenStartY = evt.touches[0].clientY;
+
+                    this.children[0].classList.add('highlight');
+
+                    // Show ghost image
+                    addAfterImage(this);
+
+                    this.style.zIndex = 10;
+                    instance.touchSlot = this;
+                });
+
+                slots[index].addEventListener('touchend',function(evt){
+                    // Reset element
+                    evt.target.style.pointerEvents = "";
+                    instance.grid.querySelectorAll('.highlight').forEach(function(el){el.classList.remove('highlight')});
+                    instance.lastPlace.remove();
+
+                    // Slight delay to smoothly move slot back in place
+                    setTimeout(function(){
+                        evt.target.classList.add('animate');
+                        evt.target.style.transform = "translate(0px,0px)";
+                    },100);
+
+                    Object.keys(slots).forEach(function(index) {
+                        let top = slots[index].getBoundingClientRect().top;
+                        let bottom = slots[index].getBoundingClientRect().bottom;
+                        let right = slots[index].getBoundingClientRect().right;
+                        let left = slots[index].getBoundingClientRect().left;
+
+                        if ( instance.clientX > left &&
+                             instance.clientX < right &&
+                             instance.clientY > top &&
+                             instance.clientY < bottom &&
+                             slots[index] != instance.touchSlot &&
+                             slots[index].tagName != "IMG" ) {
+
+                            let slot = slots[index];
+                            let dragSlot = evt.target;
+                            let tile = slot.children[0];
+                            let dragTile = dragSlot.children[0];
+
+                            // Remove highlights
+                            dragTile.classList.remove('highlight');
+                            slot.classList.remove('highlight');
+
+                            // Disable drag
+                            dragSlot.removeAttribute('draggable');
+                            slot.removeAttribute('draggable');
+
+                            // Reset element
+                            dragSlot.style.zIndex = 10;
+                            dragSlot.style.pointerEvents = "";
+
+                            // Swap tiles
+                            slot.appendChild(dragTile);
+                            dragSlot.appendChild(tile);
+
+                            // check correct number of tiles
+                            instance.correctTiles();
+
+                            // Run callback functions
+                            runCallBacks(slot,dragSlot,tile,dragTile);
+                            
+                            if (!slots[index].draggable) {
+                                // Clear highlights of all other elements
+                                Object.keys(instance.grid.children).forEach(function(key) {
+                                    instance.grid.children[key].classList.remove('highlight');
+                                });
+                            }
+                        }
+                    });
+                });
+
+                // Reset slot
+
+                slots[index].addEventListener('transitionend', function(evt) {
+                    // Remove highlight
+                    if (evt.target.style.transform == "translate(0px, 0px)") {   
+                        if(instance.lastPlace != undefined) {
+                            instance.lastPlace.remove();
+                        }
+                        this.children[0].classList.remove('highlight');
+                        this.style.zIndex = "";
+                        this.style.transform = "";
+                    }
+                });
             });
 
             window.addEventListener('resize',function(evt) {
                 setFrameDimensions(instance.grid,instance.container);
             });
+        }
+
+        function addAfterImage(el) {
+            instance.lastPlace = el.cloneNode(true);
+            $(instance.lastPlace).css({
+                'position':'absolute',
+                'opacity':'.4',
+                'top': el.getBoundingClientRect().top - el.parentNode.getBoundingClientRect().top,
+                'left': el.getBoundingClientRect().left - el.parentNode.getBoundingClientRect().left,
+                'margin-top':'0',
+                'margin-left':'0',
+                'z-index':'-2',
+            });
+            el.parentNode.appendChild(instance.lastPlace);
+        }
+
+        function runCallBacks(slot,dragSlot,tile,dragTile) {
+            let tileInPlace = ( Array.from(instance.grid.children).indexOf(slot) == 
+                                Number(tile.dataset.position) - 1 );
+            let prevTileInPlace = ( Array.from(instance.grid.children).indexOf(dragSlot.parentNode) == 
+                                    Number(dragTile.dataset.position) - 1 );
+
+            // prepare custom event
+            let homeEvt = new CustomEvent('home', {
+                detail: {
+                    self: instance,
+                    dropped: 
+                    {
+                        el: tile,
+                        position: tile.dataset.position,
+                        inPlace: tileInPlace,
+                    },
+                    dragged: 
+                    {
+                        el: dragTile,
+                        position: dragTile.dataset.position,
+                        inPlace: prevTileInPlace,
+                    }
+                }
+            });
+
+            // trigger custom event on drop
+            if( instance.settings.dropped
+                && typeof instance.settings.dropped === "function") {
+                instance.settings.dropped(homeEvt);
+            }
+
+            // puzzle completed state
+            if (instance.isSorted(instance.getTiles())) {
+                // user defined callback
+                if( instance.settings.finished 
+                    && typeof instance.settings.finished === "function") {
+                    instance.settings.finished(homeEvt);
+                }
+            }
+
+            // check if current tile is placed correctly
+            if (tileInPlace || prevTileInPlace) {
+                // user defined callbacks
+                if( instance.settings.correct 
+                    && typeof instance.settings.correct === "function") {
+                    instance.settings.correct(homeEvt);
+                }
+            }
         }
 
         function setFrameDimensions(grid,container) {
@@ -517,7 +611,6 @@ document.addEventListener('DOMContentLoaded',function($) {
                     'max-width' : (100/numcolumns)+'%',
                     'flex'      : '1 0 '+(100/numcolumns)+'%'
                 });
-                // tmpLi.draggable = "true";
 
                 tmpDiv.dataset.position = i+1;
                 
