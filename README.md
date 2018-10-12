@@ -1,5 +1,5 @@
 
-# Responsive jQuery Jigsaw Puzzle
+# Responsive Jigsaw Puzzle
 
 A responsive javascript jigsaw plugin utilizing jQuery UI.
 
