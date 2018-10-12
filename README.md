@@ -1,7 +1,7 @@
 
-# Responsive jQuery Jigsaw Puzzle
+# Responsive Jigsaw Puzzle
 
-A responsive javascript jigsaw plugin utilizing jQuery UI.
+A responsive javascript jigsaw plugin utilizing HTML5 Drag and Drop API.
 
 
 ## Getting Started
@@ -16,14 +16,6 @@ Javascript dependencies that need to be included:
 ```
 <!-- Polyfill JS -->
 <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=default"></script>
-
-<!-- jQuery/jQuery UI -->
-<link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" type="text/javascript"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js" type="text/javascript"></script>
-
-<!-- TouchPunch JS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js" type="text/javascript"></script>
 ```
 
 
@@ -139,6 +131,27 @@ Counts the number of tiles in order and returns that number.
 
 **returns** number value of correct tiles.
 
+## Callbacks
+
+These events are exposed through the settings and accept callback functions:
+
+* __dragstart__ - Fires when a tile is first dragged.
+* __dragenter__ - Fires when a tile enters a dropzone.
+* __drag__ - Fires while a tile is currently being dragged.
+* __dragover__ - Fires while a tile is dragged over a dropzone.
+* __dragleave__ - Fires when a tile is exits a dropzone.
+* __dragend__ - Fires when a tile is no longer being dragged.
+* __drop__ - Fires when a tile is dropped.
+* __touchstart__ - Fires when a tile is touched.
+* __touchmove__ - Fires while a tile is dragged over the document.
+* __touchhover__ - Fires while a tile is dragged over a dropzone.
+* __touchend__ - Fires when a tile is no longer being dragged.
+* __correct__ - Fires when a tile is dropped into the correct slot.
+* __finished__ - Fires when the entire puzzle is completed.
+
+To use callbacks pass a custom function to one of the above events in your initial settings. 
+
+Each callback is passed a custom object that includes a reference to the puzzle instance, the event and the event target.
 
 ## Running the tests
 
@@ -147,9 +160,6 @@ You can include the `debug` option to output useful information to the console.
 
 ## Built With
 
-* [jQuery](http://jquery.com/) - jQuery UI dependency
-* [jQuery UI](http://jqueryui.com/) - Used for drag and drop functionality
-* [jQuery UI Touch Punch](http://touchpunch.furf.com/) - Adds touch events to jQuery UI drag/drop
 * [Polyfill IO](https://polyfill.io/v2/docs/) - Extends vanilla JS support in IE 
 
 
