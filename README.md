@@ -1,7 +1,7 @@
 
-# Responsive jQuery Jigsaw Puzzle
+# Responsive Jigsaw Puzzle
 
-A responsive javascript jigsaw plugin utilizing jQuery UI.
+A responsive javascript jigsaw plugin utilizing HTML5 Drag and Drop API.
 
 
 ## Getting Started
