@@ -44,6 +44,7 @@ document.addEventListener('DOMContentLoaded',function(){
             drop           : function(){},
             touchstart     : function(){},
             touchmove      : function(){},
+            touchhover     : function(){},
             touchend       : function(){},
             correct        : function(){},
             finished       : function(){},
@@ -248,6 +249,12 @@ document.addEventListener('DOMContentLoaded',function(){
                     instance.touchSlot.style.pointerEvents = "none";
                     instance.touchSlot.style.transform = "translate(" + (evt.touches[0].clientX - instance.screenStartX) + "px," + (evt.touches[0].clientY - instance.screenStartY) + "px" + ")";
 
+                    let params = {
+                        self : instance,
+                        event : evt,
+                        target : evt.target,
+                    };
+
                     Object.keys(slots).forEach(function(index) {
                         let top = slots[index].getBoundingClientRect().top;
                         let bottom = slots[index].getBoundingClientRect().bottom;
@@ -268,6 +275,12 @@ document.addEventListener('DOMContentLoaded',function(){
                                 });
 
                                 slots[index].classList.add('highlight');
+                            }
+
+                            // user callback
+                            if( instance.settings.touchhover
+                                && typeof instance.settings.touchhover === "function") {
+                                instance.settings.touchhover(params);
                             }
                         }
 
