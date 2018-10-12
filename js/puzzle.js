@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded',function($) {
+document.addEventListener('DOMContentLoaded',function(){
     // ForEach Nodelist Polyfill IE9
     // https://developer.mozilla.org/en-US/docs/Web/API/NodeList/forEach#Polyfill
     if (window.NodeList && !NodeList.prototype.forEach) {
@@ -309,11 +309,8 @@ document.addEventListener('DOMContentLoaded',function($) {
                     let dt = evt.dataTransfer;
 
                     if (isIE11) {
-                        // var initialDisplay = evt.srcElement.style.display;
-                        // evt.srcElement.style.display = "none";
-                        // window.setTimeout(function(){
-                        //     evt.srcElement.style.display = initialDisplay;
-                        // });
+                        // TODO:
+                        //  Fix IE ghost image on cursor
                     } else {    
                         dt.setDragImage(new Image(),0,0); // set empty image to remove ghost image Chrome/Firefox
                         dt.setData('key',''); // set empty data to allow drag in Firefox
@@ -506,23 +503,23 @@ document.addEventListener('DOMContentLoaded',function($) {
 
         function addAfterImage(el) {
             instance.lastPlace = el.cloneNode(true);
-            $(instance.lastPlace).css({
+
+            Object.assign(instance.lastPlace.style, {
                 'position':'absolute',
                 'opacity':'.4',
-                'top': el.getBoundingClientRect().top - el.parentNode.getBoundingClientRect().top,
-                'left': el.getBoundingClientRect().left - el.parentNode.getBoundingClientRect().left,
-                'margin-top':'0',
-                'margin-left':'0',
-                'z-index':'-2',
+                'top': (el.getBoundingClientRect().top - el.parentNode.getBoundingClientRect().top) + "px",
+                'left': (el.getBoundingClientRect().left - el.parentNode.getBoundingClientRect().left) + "px",
+                'zIndex':'-2',
             });
+
             el.parentNode.appendChild(instance.lastPlace);
         }
 
         function runCallBacks(slot,dragSlot,tile,dragTile) {
-            let tileInPlace = ( Array.from(instance.grid.children).indexOf(slot) == 
-                                Number(tile.dataset.position) - 1 );
-            let prevTileInPlace = ( Array.from(instance.grid.children).indexOf(dragSlot.parentNode) == 
-                                    Number(dragTile.dataset.position) - 1 );
+            let tileInPlace = 
+            (Array.from(instance.grid.children).indexOf(slot) == Number(tile.dataset.position) - 1);
+            let prevTileInPlace = 
+            (Array.from(instance.grid.children).indexOf(dragSlot.parentNode) == Number(dragTile.dataset.position) - 1);
 
             // prepare custom event
             let homeEvt = new CustomEvent('home', {
@@ -584,7 +581,7 @@ document.addEventListener('DOMContentLoaded',function($) {
             // subtract padding from container width
             containerWidth = containerWidth - padding;
 
-            $(grid).css({
+            Object.assign(grid.style,{
                 'max-width'  : instance.settings.width + 'px',
                 'max-height' : instance.settings.height + 'px',
                 'height'     : 'calc(' + containerWidth + "px * " + "(" + instance.settings.height + "/" + instance.settings.width + ")" +')'
@@ -606,7 +603,7 @@ document.addEventListener('DOMContentLoaded',function($) {
                 let tmpImg = document.createElement('img');
                 let tmpArr = [];
 
-                $(tmpLi).css({
+                Object.assign(tmpLi.style,{
                     'height'    : (100/numrows)+'%',
                     'max-width' : (100/numcolumns)+'%',
                     'flex'      : '1 0 '+(100/numcolumns)+'%'
@@ -704,4 +701,4 @@ document.addEventListener('DOMContentLoaded',function($) {
         // return 'this' instance upon creation
         return this;
     }
-}(jQuery));
+}());
