@@ -87,21 +87,42 @@
             var image = (getURLParameter('image')) ? getURLParameter('image') : "http://www.ascopost.com/media/14006027/81891_image.jpg";
             var puzzle1 = document.querySelector('#puzzle1');
             puzzle1.pz = new Puzzle({
-                "el"         : puzzle1,
-                "difficulty" : "expert",
-                finished     :  function(evt) {
-                                    Object.assign(evt.self.fullImg.style,{'opacity':1,'z-index':1})
-                                },
+                el           : puzzle1,
+                image        : image,
+                difficulty   : "expert",
+                dragenter    : function(evt){onDragEnter(evt)},
+                dragleave    : function(evt){onDragLeave(evt)},
+                finished     : function(evt){puzzleFin(evt)},
             }).init();
 
-            // update buttons
+            // Puzzle events
+
+            function onDragEnter(evt) {
+                if (!evt.target.draggable) { 
+                    evt.target.classList.add('highlight');
+                }
+            }
+
+            function onDragLeave(evt) {
+                if (!evt.target.draggable) {
+                    evt.target.classList.remove('highlight');
+                }
+            }
+
+            function puzzleFin(evt) {
+                setTimeout(function() {
+                    Object.assign(evt.self.fullImg.style,{'opacity':1,'z-index':1});
+                }.bind(evt),300); 
+            }
+
+            // Update buttons
             document.querySelectorAll('div[data-attr="reset"]').forEach(function(item){
                 item.addEventListener('click',function(evt){
                     updatePuzzle(evt);
                 });
             });
             
-            // make sure number inputs are between 1 and 10
+            // Make sure number inputs are between 1 and 10
             document.querySelectorAll('input[type="number"]').forEach(function(item){
                 item.addEventListener('change',function(evt){
                     if (Number(this.value) > 10) {
@@ -112,7 +133,7 @@
                 });
             });
 
-            // update puzzle and reinitialize
+            // Update puzzle and reinitialize
             function updatePuzzle(evt) {
                 var inputs = document.querySelectorAll('.options input').forEach(function(item,index){
                     if (item.value.length && item.type == "text" || item.type == "number") {

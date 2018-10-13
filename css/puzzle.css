@@ -85,7 +85,7 @@
     transition: all 0.2s;
 }
 
-.frame img[data-overlay="show"]  {
+.frame *[data-inplace="true"] img  {
     filter: grayscale(0);
 }
 
