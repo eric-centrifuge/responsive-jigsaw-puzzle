@@ -92,6 +92,8 @@
                 difficulty   : "expert",
                 dragenter    : function(evt){onDragEnter(evt)},
                 dragleave    : function(evt){onDragLeave(evt)},
+                mousedown    : function(evt){onMouseDown(evt)},
+                mouseup      : function(evt){onMouseUp(evt)},
                 finished     : function(evt){puzzleFin(evt)},
             }).init();
 
@@ -107,6 +109,14 @@
                 if (!evt.target.draggable) {
                     evt.target.classList.remove('highlight');
                 }
+            }
+
+            function onMouseDown(evt) {
+                evt.target.children[0].classList.add('highlight');
+            }
+
+            function onMouseUp(evt) {
+                evt.target.children[0].classList.remove('highlight');
             }
 
             function puzzleFin(evt) {

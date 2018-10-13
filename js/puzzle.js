@@ -18,11 +18,11 @@ document.addEventListener('DOMContentLoaded',function(){
         this.key;
         this.mouseX;
         this.mouseY;
-        this.startX;
-        this.startY;
+        this.offsetX;
+        this.offsetY;
         this.touchSlot;
-        this.screentStartX;
-        this.screenStartY;
+        this.clientX;
+        this.clientY;
         this.clientX
         this.clientY;
         this.lastPlace;
@@ -37,16 +37,18 @@ document.addEventListener('DOMContentLoaded',function(){
             numrows        : 3,
             difficulty     : "normal",
             dragstart      : function(){},
-            dragenter      : function(evt){ if(!evt.target.draggable){ evt.target.classList.add('highlight');} },
+            dragenter      : function(){},
             drag           : function(){},
             dragover       : function(){},
-            dragleave      : function(evt){ if(!evt.target.draggable){ evt.target.classList.remove('highlight');} },
+            dragleave      : function(){},
             dragend        : function(){},
             drop           : function(){},
             touchstart     : function(){},
             touchmove      : function(){},
             touchhover     : function(){},
             touchend       : function(){},
+            mousedown      : function(){},
+            mouseup        : function(){},
             correct        : function(){},
             finished       : function(){},
             debug          : false,
@@ -242,14 +244,14 @@ document.addEventListener('DOMContentLoaded',function(){
             // Use document move event to hover over other elements
             document.addEventListener('touchmove', function(evt) {
                 if (instance.touchSlot) {
-                    if( evt.touches[0].clientY > instance.startY &&
-                        evt.touches[0].clientX > instance.startX &&
-                        evt.touches[0].clientY < document.body.offsetHeight - (instance.touchSlot.offsetHeight - instance.startY) &&
-                        evt.touches[0].clientX < document.body.offsetWidth - (instance.touchSlot.offsetWidth - instance.startX)) {
+                    if( evt.touches[0].clientY > instance.offsetY &&
+                        evt.touches[0].clientX > instance.offsetX &&
+                        evt.touches[0].clientY < document.body.offsetHeight - (instance.touchSlot.offsetHeight - instance.offsetY) &&
+                        evt.touches[0].clientX < document.body.offsetWidth - (instance.touchSlot.offsetWidth - instance.offsetX)) {
                     
                         instance.touchSlot.style.zIndex = 10;
                         instance.touchSlot.style.pointerEvents = "none";
-                        instance.touchSlot.style.transform = "translate(" + (evt.touches[0].clientX - instance.screenStartX) + "px," + (evt.touches[0].clientY - instance.screenStartY) + "px" + ")";
+                        instance.touchSlot.style.transform = "translate(" + (evt.touches[0].clientX - instance.clientX) + "px," + (evt.touches[0].clientY - instance.clientY) + "px" + ")";
 
                         let params = {
                             self : instance,
@@ -272,7 +274,7 @@ document.addEventListener('DOMContentLoaded',function(){
                                  slots[index] != instance.touchSlot ) {
                                 
                                 if (!slots[index].style.pointerEvents) {
-                                    // Clear highlights of all other elements
+                                    // Clear last highlighted element
                                     Object.keys(instance.grid.children).forEach(function(key) {
                                         instance.grid.children[key].classList.remove('highlight');
                                     });
@@ -299,13 +301,12 @@ document.addEventListener('DOMContentLoaded',function(){
                 let isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
                 let key = 0;
                 
-                // Set X/Y position for when slot is dragged
-
+                // Set X,Y position for when slot is dragged
                 slots[index].addEventListener('mousemove', function(evt){
-                    instance.startX = evt.offsetX;
-                    instance.startY = evt.offsetY;
-                    instance.screenStartX = evt.clientX;
-                    instance.screenStartY = evt.clientY;
+                    instance.offsetX = evt.offsetX;
+                    instance.offsetY = evt.offsetY;
+                    instance.clientX = evt.clientX;
+                    instance.clientY = evt.clientY;
 
                     let params = {
                         self : instance,
@@ -323,9 +324,9 @@ document.addEventListener('DOMContentLoaded',function(){
                 // Mouse events
 
                 slots[index].addEventListener('mousedown', function(evt) {
-                    this.children[0].classList.add('highlight');
+                    // Enable drag
                     this.draggable = true;
-
+                    
                     // Show ghost image
                     addAfterImage(this);
 
@@ -343,7 +344,6 @@ document.addEventListener('DOMContentLoaded',function(){
                 });
 
                 slots[index].addEventListener('mouseup', function(evt){
-                    this.children[0].classList.remove('highlight');
                     this.style.transform = "";
                     this.removeAttribute('draggable');
 
@@ -389,14 +389,72 @@ document.addEventListener('DOMContentLoaded',function(){
                     }
                 });
 
-                slots[index].addEventListener('drag', function(evt){
-                    if( instance.mouseY > instance.startY &&
-                        instance.mouseX > instance.startX &&
-                        instance.mouseY < document.body.offsetHeight - (evt.target.offsetHeight - instance.startY) &&
-                        instance.mouseX < document.body.offsetWidth - (evt.target.offsetWidth - instance.startX)) {
+                slots[index].addEventListener('drag', function(evt) {
+                    let x;
+                    let y;
+                    // Set coordinates
+                    let mouseX = instance.mouseX;
+                    let mouseY = instance.mouseY;
+                    let offsetX = instance.offsetX;
+                    let offsetY = instance.offsetY;
+                    let clientX = instance.clientX;
+                    let clientY = instance.clientY;
+                    // Declare borders
+                    let topBorder = mouseY < offsetY;
+                    let leftBorder = mouseX < offsetX;
+                    let rightBorder = mouseX > document.body.offsetWidth - (evt.target.offsetWidth - offsetX);
+                    let bottomBorder = mouseY > document.body.offsetHeight - (evt.target.offsetHeight - offsetY);
+                    
+                    if( !leftBorder && !topBorder && !rightBorder && !bottomBorder) {
                         evt.target.style.zIndex = 10;
                         evt.target.style.pointerEvents = "none";
-                        evt.target.style.transform = "translate(" + (instance.mouseX - instance.screenStartX) + "px," + (instance.mouseY - instance.screenStartY) + "px" + ")";
+                        x = mouseX - clientX;
+                        y = mouseY - clientY;
+                        evt.target.style.transform = "translate(" + x + "px," + y + "px)";
+                    }
+
+                    // Hitting top of screen
+                    if (topBorder && !rightBorder && !leftBorder) {
+                        x = mouseX - clientX;
+                        y = clientY - offsetY;
+                        evt.target.style.transform = "translate(" + x + "px," + -y + "px)";
+                    }
+
+                    // Hitting bottom of screen
+                    if (bottomBorder && !rightBorder && !leftBorder) {
+                        x = mouseX - clientX;
+                        y = document.body.offsetHeight - (clientY + (evt.target.offsetHeight - offsetY));
+                        evt.target.style.transform = "translate(" + x + "px," + y + "px)";
+                    }
+
+                    // Hitting left side of screen
+                    if (leftBorder && !bottomBorder && !topBorder) {
+                        x = clientX - offsetX;
+                        y = mouseY - clientY;
+                        evt.target.style.transform = "translate(" + -x + "px," + y + "px)";
+                    } else if (leftBorder && bottomBorder) {
+                        x = clientX - offsetX;
+                        y = document.body.offsetHeight - (clientY + (evt.target.offsetHeight - offsetY));
+                        evt.target.style.transform = "translate(" + -x + "px," + y + "px)";
+                    } else if (leftBorder && topBorder) {
+                        x = clientX - offsetX;
+                        y = clientY - offsetY;
+                        evt.target.style.transform = "translate(" + -x + "px," + -y + "px)";
+                    }
+
+                    // Hitting right side of screen
+                    if (rightBorder && !bottomBorder && !topBorder) {
+                        x = document.body.offsetWidth - (clientX + (evt.target.offsetWidth - offsetX));
+                        y = mouseY - clientY;
+                        evt.target.style.transform = "translate(" + x + "px," + y + "px)";
+                    } else if (rightBorder && topBorder) {
+                        x = document.body.offsetWidth - (clientX + (evt.target.offsetWidth - offsetX));
+                        y = clientY - offsetY;
+                        evt.target.style.transform = "translate(" + x + "px," + -y + "px)";
+                    } else if (rightBorder && bottomBorder) {
+                        x = document.body.offsetWidth - (clientX + (evt.target.offsetWidth - offsetX));
+                        y = document.body.offsetHeight - (clientY + (evt.target.offsetHeight - offsetY));
+                        evt.target.style.transform = "translate(" + x + "px," + y + "px)";
                     }
 
                     let params = {
@@ -413,13 +471,13 @@ document.addEventListener('DOMContentLoaded',function(){
                 });
 
                 slots[index].addEventListener('dragend', function(evt){
-                    
+                    // If out of place
                     if (!evt.target.dataset.inplace) {
                         // Enable pointer events
                         evt.target.style.pointerEvents = "";
                     }
 
-                    // Slight delay to smoothly move slot back in place
+                    // Slight delay to smoothly move piece
                     setTimeout(function(){
                         evt.target.classList.add('animate');
                         evt.target.style.transform = "translate(0px,0px)";
@@ -527,10 +585,10 @@ document.addEventListener('DOMContentLoaded',function(){
 
                 slots[index].addEventListener('touchstart', function(evt) {
                     instance.touchSlot = evt.target;
-                    instance.startY = Math.round(evt.touches[0].clientY - evt.target.getBoundingClientRect().top);
-                    instance.startX = Math.round(evt.touches[0].clientX - evt.target.getBoundingClientRect().left);
-                    instance.screenStartX = evt.touches[0].clientX;
-                    instance.screenStartY = evt.touches[0].clientY;
+                    instance.offsetY = Math.round(evt.touches[0].clientY - evt.target.getBoundingClientRect().top);
+                    instance.offsetX = Math.round(evt.touches[0].clientX - evt.target.getBoundingClientRect().left);
+                    instance.clientX = evt.touches[0].clientX;
+                    instance.clientY = evt.touches[0].clientY;
 
                     this.children[0].classList.add('highlight');
 
@@ -638,6 +696,10 @@ document.addEventListener('DOMContentLoaded',function(){
         }
 
         function addAfterImage(el) {
+            if (instance.lastPlace) {
+                instance.lastPlace.remove();
+            }
+
             instance.lastPlace = el.cloneNode(true);
 
             Object.assign(instance.lastPlace.style, {
