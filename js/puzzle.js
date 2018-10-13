@@ -241,55 +241,56 @@ document.addEventListener('DOMContentLoaded',function(){
 
             // Use document move event to hover over other elements
             document.addEventListener('touchmove', function(evt) {
-                if( evt.touches[0].clientY > instance.startY &&
-                    evt.touches[0].clientX > instance.startX &&
-                    evt.touches[0].clientY < document.body.offsetHeight - (instance.touchSlot.offsetHeight - instance.startY) &&
-                    evt.touches[0].clientX < document.body.offsetWidth - (instance.touchSlot.offsetWidth - instance.startX)) {
-                    instance.touchSlot.style.zIndex = 10;
-                    instance.touchSlot.style.pointerEvents = "none";
-                    instance.touchSlot.style.transform = "translate(" + (evt.touches[0].clientX - instance.screenStartX) + "px," + (evt.touches[0].clientY - instance.screenStartY) + "px" + ")";
+                if (instance.touchSlot) {
+                    if( evt.touches[0].clientY > instance.startY &&
+                        evt.touches[0].clientX > instance.startX &&
+                        evt.touches[0].clientY < document.body.offsetHeight - (instance.touchSlot.offsetHeight - instance.startY) &&
+                        evt.touches[0].clientX < document.body.offsetWidth - (instance.touchSlot.offsetWidth - instance.startX)) {
+                    
+                        instance.touchSlot.style.zIndex = 10;
+                        instance.touchSlot.style.pointerEvents = "none";
+                        instance.touchSlot.style.transform = "translate(" + (evt.touches[0].clientX - instance.screenStartX) + "px," + (evt.touches[0].clientY - instance.screenStartY) + "px" + ")";
 
-                    let params = {
-                        self : instance,
-                        event : evt,
-                        target : evt.target,
-                    };
+                        let params = {
+                            self : instance,
+                            event : evt,
+                            target : evt.target,
+                        };
 
-                    // Map out touchpoints for other dropzones
-                    Object.keys(slots).forEach(function(index) {
-                        let top = slots[index].getBoundingClientRect().top;
-                        let bottom = slots[index].getBoundingClientRect().bottom;
-                        let right = slots[index].getBoundingClientRect().right;
-                        let left = slots[index].getBoundingClientRect().left;
+                        // Map out touchpoints for other dropzones
+                        Object.keys(slots).forEach(function(index) {
+                            let top = slots[index].getBoundingClientRect().top;
+                            let bottom = slots[index].getBoundingClientRect().bottom;
+                            let right = slots[index].getBoundingClientRect().right;
+                            let left = slots[index].getBoundingClientRect().left;
 
-                        console.log(slots[index].tagName);
+                            // Do something when hovering over dropzone
+                            if ( evt.touches[0].clientX > left &&
+                                 evt.touches[0].clientX < right &&
+                                 evt.touches[0].clientY > top &&
+                                 evt.touches[0].clientY < bottom &&
+                                 slots[index] != instance.touchSlot ) {
+                                
+                                if (!slots[index].style.pointerEvents) {
+                                    // Clear highlights of all other elements
+                                    Object.keys(instance.grid.children).forEach(function(key) {
+                                        instance.grid.children[key].classList.remove('highlight');
+                                    });
 
-                        // Do something when hovering over dropzone
-                        if ( evt.touches[0].clientX > left &&
-                             evt.touches[0].clientX < right &&
-                             evt.touches[0].clientY > top &&
-                             evt.touches[0].clientY < bottom &&
-                             slots[index] != instance.touchSlot ) {
-                            
-                            if (!slots[index].draggable) {
-                                // Clear highlights of all other elements
-                                Object.keys(instance.grid.children).forEach(function(key) {
-                                    instance.grid.children[key].classList.remove('highlight');
-                                });
+                                    slots[index].classList.add('highlight');
+                                }
 
-                                slots[index].classList.add('highlight');
+                                // user callback
+                                if( instance.settings.touchhover
+                                    && typeof instance.settings.touchhover === "function") {
+                                    instance.settings.touchhover(params);
+                                }
                             }
 
-                            // user callback
-                            if( instance.settings.touchhover
-                                && typeof instance.settings.touchhover === "function") {
-                                instance.settings.touchhover(params);
-                            }
-                        }
-
-                        instance.clientX = evt.touches[0].clientX;
-                        instance.clientY = evt.touches[0].clientY;
-                    });
+                            instance.clientX = evt.touches[0].clientX;
+                            instance.clientY = evt.touches[0].clientY;
+                        });
+                    }
                 }
             });
 
@@ -525,6 +526,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 // Touch events for mobile
 
                 slots[index].addEventListener('touchstart', function(evt) {
+                    instance.touchSlot = evt.target;
                     instance.startY = Math.round(evt.touches[0].clientY - evt.target.getBoundingClientRect().top);
                     instance.startX = Math.round(evt.touches[0].clientX - evt.target.getBoundingClientRect().left);
                     instance.screenStartX = evt.touches[0].clientX;
@@ -551,7 +553,7 @@ document.addEventListener('DOMContentLoaded',function(){
                     }
                 });
 
-                slots[index].addEventListener('touchend', function(evt){
+                slots[index].addEventListener('touchend', function(evt) {
                     // Reset element
                     evt.target.style.pointerEvents = "";
                     instance.grid.querySelectorAll('.highlight').forEach(function(el){el.classList.remove('highlight')});
@@ -574,7 +576,7 @@ document.addEventListener('DOMContentLoaded',function(){
                              instance.clientY > top &&
                              instance.clientY < bottom &&
                              slots[index] != instance.touchSlot &&
-                             slots[index].tagName != "IMG" ) {
+                             !slots[index].style.pointerEvents ) {
 
                             let slot = slots[index];
                             let dragSlot = evt.target;
@@ -610,6 +612,9 @@ document.addEventListener('DOMContentLoaded',function(){
                             }
                         }
                     });
+
+                    // Clear currently dragged piece
+                    instance.touchSlot = null;
                 });
 
                 // Reset slot
