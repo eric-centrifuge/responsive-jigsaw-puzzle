@@ -66,7 +66,6 @@ input[type="number"] {
 
 *[for="options"],
 *[data-attr="reset"] {
-    width: 100%;
     padding: 10px;
     font-size: calc(.5vw + 16px);
     text-align: center;
@@ -114,8 +113,16 @@ input[name="options"]:checked~*[for="options"]:after {
     place-content: space-between;
 }
 
+.fgroup.grid .fieldset {
+    flex-flow: column wrap;
+}
+
 .fgroup .fieldset > * {
     flex: 1 0 auto;
+}
+
+.fieldset.difficulty > * {
+    flex: 0 0 24%;
 }
 
 .fgroup .fieldset input {
@@ -154,8 +161,8 @@ input[name="options"]:checked~*[for="options"]:after {
     right: 0;
     bottom: 0;
     margin: auto;
-    width: 0%;
-    height: 0%;
+    width: 0;
+    height: 0;
     opacity: 0;
     z-index: -1;
     transition: all 0.2s;

@@ -43,7 +43,7 @@
         </div>
 
         <div class="fgroup no-select">
-            <div class="fieldset">
+            <div class="fieldset difficulty">
                 <input type="radio" id="easy" name="difficulty" value="easy">
                 <label for="easy">Easy</label>
 
@@ -69,9 +69,9 @@
 
         document.addEventListener('DOMContentLoaded',function() {
             function getURLParameter(sParam) {
-                var sPageURL = decodeURIComponent(window.location.search.substring(1)),
-                    sURLVariables = sPageURL.split('&'),
-                    sParameterName,
+                const sPageURL = decodeURIComponent(window.location.search.substring(1)),
+                    sURLVariables = sPageURL.split('&');
+                let sParameterName,
                     i;
 
                 for (i = 0; i < sURLVariables.length; i++) {
@@ -83,9 +83,9 @@
                 }
             }
 
-            var opts = {};
-            var image = (getURLParameter('image')) ? getURLParameter('image') : "https://images.unsplash.com/photo-1548161955-40def7e9742d";
-            var puzzle1 = document.querySelector('#puzzle1');
+            const opts = {};
+            const image = (getURLParameter('image')) ? getURLParameter('image') : "https://images.unsplash.com/photo-1548161955-40def7e9742d";
+            const puzzle1 = document.querySelector('#puzzle1');
             puzzle1.pz = new Puzzle({
                 el           : puzzle1,
                 image        : image,
