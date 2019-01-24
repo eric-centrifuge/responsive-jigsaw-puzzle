@@ -247,6 +247,7 @@ document.addEventListener('DOMContentLoaded',function(){
                         evt.touches[0].clientY < document.body.offsetHeight - (instance.touchSlot.offsetHeight - instance.offsetY) &&
                         evt.touches[0].clientX < document.body.offsetWidth - (instance.touchSlot.offsetWidth - instance.offsetX)) {
 
+                        // noinspection JSValidateTypes
                         instance.touchSlot.style.zIndex = 10;
                         instance.touchSlot.style.pointerEvents = "none";
                         instance.touchSlot.style.transform = "translate(" + (evt.touches[0].clientX - instance.clientX) + "px," + (evt.touches[0].clientY - instance.clientY) + "px" + ")";

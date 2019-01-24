@@ -1,7 +1,9 @@
+/*noinspection CssUnusedSymbol*/
 .animate {
     transition: 0.2s all;
 }
 
+/*noinspection CssUnusedSymbol*/
 .frame {
     padding: 0;
     width: 100%;
@@ -50,10 +52,12 @@
     transition: all 0.2s;
 }
 
+/*noinspection CssUnusedSymbol*/
 .frame div.highlight {
     z-index: 2;
 }
 
+/*noinspection CssUnusedSymbol*/
 .frame div.highlight:before {
     outline: none;
     border:4px solid rgba(0,255,0,1);
@@ -68,10 +72,12 @@
     transition: 0.1s all;
 }
 
+/*noinspection CssUnusedSymbol*/
 .frame li.highlight {
     position: relative;
 }
 
+/*noinspection CssUnusedSymbol*/
 .frame li.highlight:before {
     background: rgba(0,255,0,.5);
     z-index: 2;
@@ -98,6 +104,7 @@
                                   supported by Chrome and Opera */
 }
 
+/*noinspection CssUnusedSymbol*/
 .full-img {
     max-width: 100%;
     width: 100% !important; /* Important tags needed to force responsiveness in IE */
@@ -112,6 +119,7 @@
     transition: 0.5s opacity;
 }
 
+/*noinspection CssUnusedSymbol*/
 .btn-primary {
     background: #9a371f;
 }
