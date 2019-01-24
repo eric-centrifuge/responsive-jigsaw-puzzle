@@ -1,22 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta charset="utf-8">
     <base target="_parent" />
-    <title>Responsive jQuery Jigsaw Puzzle</title>
+    <title>Responsive Jigsaw Puzzle</title>
     <!-- Latest compiled and minified CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
     <!-- Styles -->
     <link rel="stylesheet" href="../css/puzzle.css">
     <link rel="stylesheet" href="demo.css">
     <!-- Include Polyfills First -->
     <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=default"></script>
-    <!-- Latest compiled and minified JavaScript -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" type="text/javascript"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js" type="text/javascript"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js" type="text/javascript"></script>
     <script src="../js/puzzle.js"></script>
 </head>
 
@@ -32,17 +28,17 @@
         <div class="fgroup grid">
             <div class="fieldset">
                 <label for="numrows"># of rows</label>
-                <input type="number" name="numrows" value="3" min="1" max="10">
+                <input type="number" id="numrows" name="numrows" value="3" min="1" max="10">
 
                 <label for="numcolumns"># of columns</label>
-                <input type="number" name="numcolumns" value="3" min="1" max="10">
+                <input type="number" id="numcolumns" name="numcolumns" value="3" min="1" max="10">
             </div>
         </div>
 
         <div class="fgroup image">
             <div class="fieldset" style="text-align: left;">
                 <label for="image">Image URL</label>
-                <input type="text" name="image" style="width: 100%;" value="">
+                <input type="text" id="image" name="image" style="width: 100%;" value="">
             </div>
         </div>
 
@@ -85,29 +81,60 @@
                         return sParameterName[1] === undefined ? true : sParameterName[1];
                     }
                 }
-            };
+            }
 
             var opts = {};
-            var image = (getURLParameter('image')) ? getURLParameter('image') : "http://www.ascopost.com/media/14006027/81891_image.jpg";
+            var image = (getURLParameter('image')) ? getURLParameter('image') : "https://images.unsplash.com/photo-1548161955-40def7e9742d";
             var puzzle1 = document.querySelector('#puzzle1');
             puzzle1.pz = new Puzzle({
-                "el"         : puzzle1,
-                "difficulty" : "expert",
-                finished     :  function(evt) {
-                                    // $(evt.detail.self.fullImg).css({'opacity':1,'z-index':1})
-                                },
+                el           : puzzle1,
+                image        : image,
+                difficulty   : "expert",
+                dragenter    : function(evt){onDragEnter(evt)},
+                dragleave    : function(evt){onDragLeave(evt)},
+                mousedown    : function(evt){onMouseDown(evt)},
+                mouseup      : function(evt){onMouseUp(evt)},
+                finished     : function(evt){puzzleFin(evt)}
             }).init();
 
-            // update buttons
+            // Puzzle events
+
+            function onDragEnter(evt) {
+                if (!evt.target.draggable) { 
+                    evt.target.classList.add('highlight');
+                }
+            }
+
+            function onDragLeave(evt) {
+                if (!evt.target.draggable) {
+                    evt.target.classList.remove('highlight');
+                }
+            }
+
+            function onMouseDown(evt) {
+                evt.target.children[0].classList.add('highlight');
+            }
+
+            function onMouseUp(evt) {
+                evt.target.children[0].classList.remove('highlight');
+            }
+
+            function puzzleFin(evt) {
+                setTimeout(function() {
+                    Object.assign(evt.self.fullImg.style,{'opacity':1,'z-index':1});
+                }.bind(evt),300); 
+            }
+
+            // Update buttons
             document.querySelectorAll('div[data-attr="reset"]').forEach(function(item){
                 item.addEventListener('click',function(evt){
                     updatePuzzle(evt);
                 });
             });
             
-            // make sure number inputs are between 1 and 10
+            // Make sure number inputs are between 1 and 10
             document.querySelectorAll('input[type="number"]').forEach(function(item){
-                item.addEventListener('change',function(evt){
+                item.addEventListener('change',function(){
                     if (Number(this.value) > 10) {
                         this.value = 10;
                     } else if (Number(this.value) <= 0) {
@@ -116,14 +143,14 @@
                 });
             });
 
-            // update puzzle and reinitialize
-            function updatePuzzle(evt) {
-                var inputs = document.querySelectorAll('.options input').forEach(function(item,index){
-                    if (item.value.length && item.type == "text" || item.type == "number") {
+            // Update puzzle and reinitialize
+            function updatePuzzle() {
+                document.querySelectorAll('.options input').forEach(function(item){
+                    if (item.value.length && item.type === "text" || item.type === "number") {
                         opts[item.name] = item.value;
                     }
 
-                    if (item.value.length && item.type == "radio" && item.checked) {
+                    if (item.value.length && item.type === "radio" && item.checked) {
                         opts[item.name] = item.value;
                     }
                 });

@@ -1,6 +1,9 @@
+.animate {
+    transition: 0.2s all;
+}
+
 .frame {
     padding: 0;
-    margin-bottom: 50px;
     width: 100%;
     height: 100%;
     display: flex;
@@ -15,6 +18,7 @@
 .frame li {
     display: inline-block;
     position: relative;
+    cursor: pointer;
     animation: zoomIn 0.2s;
 }
 
@@ -34,7 +38,7 @@
     outline: 1px solid #000;
     box-sizing: border-box;
     overflow: hidden;
-    cursor: pointer;
+    pointer-events: none;
 }
 
 .frame div:before {
@@ -61,6 +65,7 @@
     height: 100%;
     width: 100%;
     z-index: -1;
+    transition: 0.1s all;
 }
 
 .frame li.highlight {
@@ -79,7 +84,7 @@
     transition: all 0.2s;
 }
 
-.frame img[data-overlay="show"]  {
+.frame *[data-inplace="true"] img  {
     filter: grayscale(0);
 }
 
@@ -87,7 +92,6 @@
     position: relative;
     -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
-     -khtml-user-select: none; /* Konqueror HTML */
        -moz-user-select: none; /* Firefox */
         -ms-user-select: none; /* Internet Explorer/Edge */
             user-select: none; /* Non-prefixed version, currently
@@ -109,14 +113,12 @@
 }
 
 .btn-primary {
-    background-color: #9a371f;
     background: #9a371f;
 }
 
 .no-select {
     -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
-     -khtml-user-select: none; /* Konqueror HTML */
        -moz-user-select: none; /* Firefox */
         -ms-user-select: none; /* Internet Explorer/Edge */
             user-select: none; /* Non-prefixed version, currently
